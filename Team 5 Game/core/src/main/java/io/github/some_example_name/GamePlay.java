@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -52,7 +53,7 @@ public class GamePlay implements Screen {
     Rectangle finishZone;
     // map collision
     Array<TiledMapTileLayer> nonWalkableLayers;
-    TiledMapTileLayer walls;
+    MapLayer walls;
     TiledMapTileLayer corners;
 
     // UI
@@ -116,27 +117,21 @@ public class GamePlay implements Screen {
         map = new TmxMapLoader().load(Gdx.files.internal("maps/ENG.tmx").file().getPath());
         System.out.println("Map loaded successfully");
 
-        // Set up map layers
-        nonWalkableLayers = new Array<>();
-        nonWalkableLayers.add((TiledMapTileLayer) map.getLayers().get("Non-walkable Objects"));
-        nonWalkableLayers.add((TiledMapTileLayer) map.getLayers().get("Non-walkable Objects 2"));
-        nonWalkableLayers.add((TiledMapTileLayer) map.getLayers().get("Fence"));
-        nonWalkableLayers.add((TiledMapTileLayer) map.getLayers().get("Trees"));
+        // Set up collision layer
+        walls = map.getLayers().get("Wall_Collisions");
 
-        walls = (TiledMapTileLayer) map.getLayers().get("Edges");
-        corners = (TiledMapTileLayer) map.getLayers().get("Corners");
-
+        // Set up map renderer
         mapRenderer = new OrthogonalTiledMapRenderer(map);
 
         // Initialize game objects
         // player
-        player = new Player(playerTexture, 775, 100, nonWalkableLayers, walls, corners, 40, 40);
+        player = new Player(playerTexture, 775, 100, walls, 40, 40);
 
         // speedboost
         speedBoost = new SpeedBoostEvent("SpeedBoost", speedBoostTexture, 680, 490);
 
         // dean
-        dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, corners, 425f, 425f, 180f, 145f, 50, 50);
+        dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
 
         // doors
         Door door = new Door(485, 580, 52, 52, doorTexture);
@@ -148,7 +143,7 @@ public class GamePlay implements Screen {
         key = new KeyEvent("Keycard", keyZone, keyTexture);
 
         // tripwire
-        Rectangle tripWireZone = new Rectangle(378, 500, 32, 32);
+        Rectangle tripWireZone = new Rectangle(384, 480, 32, 64);
         tripWire = new TripwireEvent("tripwire", tripWireZone, door);
 
         finishZone = new Rectangle(0, 864, 32, 128);

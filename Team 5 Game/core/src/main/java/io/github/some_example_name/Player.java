@@ -5,6 +5,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -26,8 +29,8 @@ public class Player {
     protected int sizeY;
 
     Array<TiledMapTileLayer> nonWalkable;
-    TiledMapTileLayer walls;
-    TiledMapTileLayer corners;
+    MapLayer walls_layer;
+    TiledMapTileLayer object_layer;
 
     /* Player constructor
 
@@ -36,18 +39,16 @@ public class Player {
       @param startYposition - Starting player position on y-axis
       @param nonWalkableLayers - An array of map layers the player can't move on.
     */
-    public Player(Texture playerTexture, float startXPosition, float startYPosition,
-                  Array<TiledMapTileLayer> nonWalkableLayers, TiledMapTileLayer wallLayer, TiledMapTileLayer cornerLayer, int sizeX, int sizeY) {
+    public Player(Texture playerTexture, float startXPosition, float startYPosition, 
+                MapLayer wallLayer, int sizeX, int sizeY) {
         sprite = new Sprite(playerTexture);
         position = new Vector2(startXPosition, startYPosition);
         sprite.setPosition(position.x, position.y);
         sprite.setSize(sizeX, sizeY);
 
-        this.nonWalkable = nonWalkableLayers;
-        this.walls = wallLayer;
-        this.corners = cornerLayer;
+        this.walls_layer = wallLayer;
 
-        playerCollision = new Rectangle(position.x, position.y, sprite.getWidth(), sprite.getHeight());
+        playerCollision = new Rectangle(position.x, position.y, (float) (sizeX), (float) (sizeY));
     }
 
     /* Called by the main class every frame, responsible for player movement and collisions.
@@ -89,32 +90,35 @@ public class Player {
 
         tripWire.checkTrigger(playerCollision);
 
+        // all other collisions
         if (!blocked) {
-            if (isWalkable(newXPosition, position.y)) position.x = newXPosition;
-            if (isWalkable(position.x, newYPosition)) position.y = newYPosition;
+            Rectangle nextPosX = new Rectangle(playerCollision);
+            nextPosX.x = newXPosition;
+            if (isWalkable(nextPosX)) {
+                position.x = newXPosition;
+            }
+            Rectangle nextPosY = new Rectangle(playerCollision);
+            nextPosY.y = newYPosition;
+            if (isWalkable(nextPosY)) {
+                position.y = newYPosition;
+            }
         }
-
+        System.out.println(position);
         sprite.setPosition(position.x, position.y);
         playerCollision.setPosition(position.x, position.y);
     }
 
     /* This function checks that the position the player is moving to is walkable.
     * This prevents the player from moving through walls or obstacles.
-      @param xPosition - The x-axis position of the location to be checked
-      @param yPosition - The y-axis position of the location to be checked
+      @param hitbox - The Rectangle hitbox to check collisions against.
       @return bool - True if walkable, false if not
     */
-    public boolean isWalkable(float xPosition, float yPosition) {
-
-        for (TiledMapTileLayer layer : nonWalkable) {
-            int tileXPosition = (int) (xPosition / layer.getTileWidth());
-            int tileYPosition = (int) (yPosition / layer.getTileHeight());
-
-            TiledMapTileLayer.Cell cell1 = layer.getCell(tileXPosition, tileYPosition);
-            TiledMapTileLayer.Cell cell2 = walls.getCell(tileXPosition, tileYPosition);
-            boolean isNonWalkable = cell1 != null && cell1.getTile() != null;
-            boolean isWall = cell2 != null && cell2.getTile() != null;
-            if (isNonWalkable || isWall) {
+    public boolean isWalkable(Rectangle hitbox) {
+        MapObjects walls = walls_layer.getObjects();
+        for (int i = 0; i < walls.getCount(); i++){
+            RectangleMapObject mapRect = (RectangleMapObject) walls.get(i);
+            Rectangle actualRect = mapRect.getRectangle();
+            if (actualRect.overlaps(hitbox)){
                 return false;
             }
         }

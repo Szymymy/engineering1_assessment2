@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.maps.MapLayer;
 
 
 
@@ -18,9 +19,8 @@ public class Dean extends Player{
 
 
     public Dean(Texture deanTexture, float startXPosition, float startYPosition,
-                Array<TiledMapTileLayer> nonWalkableLayer, TiledMapTileLayer wallLayer,
-                TiledMapTileLayer cornerLayer, float roomX, float roomY, float roomWidth, float roomHeight, int sizeX, int sizeY) {
-        super(deanTexture, startXPosition, startYPosition, nonWalkableLayer, wallLayer, cornerLayer, sizeX, sizeY);
+                Array<TiledMapTileLayer> nonWalkableLayer, MapLayer wallLayer, float roomX, float roomY, float roomWidth, float roomHeight, int sizeX, int sizeY) {
+        super(deanTexture, startXPosition, startYPosition, wallLayer, sizeX, sizeY);
         this.roomX = roomX;
         this.roomY = roomY;
         this.roomWidth = roomWidth;
@@ -49,11 +49,11 @@ public class Dean extends Player{
             float newX = position.x + direction.x * deanSpeed * delta;
             float newY = position.y + direction.y * deanSpeed * delta;
 
+            
+
             //checks if there is a collision
-            if(isWalkable(newX, position.y)){
+            if(isWalkable(deanRect)){
                 position.x = newX;
-            }
-            if(isWalkable(position.x, newY)){
                 position.y = newY;
             }
         }

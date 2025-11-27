@@ -34,7 +34,7 @@ public class SpeedBoostEvent implements Event{
         this.texture = texture;
         this.boostSprite = new Sprite(texture);
         this.position = new Vector2(xPosition, yPosition);
-        this.collisionRadius = 10f;
+        this.collisionRadius = 20f;
         this.active = true;
     }
 

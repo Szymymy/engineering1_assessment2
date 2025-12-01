@@ -21,6 +21,7 @@ public class SpeedBoostEvent implements Event{
     private Vector2 position;
     private float collisionRadius;
     private boolean active;
+    private EventCounter eventCounter;
 
     /* Constructor for the SpeedBoost
      * @param texture - The texture for the item (coffee cup)
@@ -28,7 +29,7 @@ public class SpeedBoostEvent implements Event{
      * @param xPosition - The item's position on the x-axis
      * @param yPosition - The item's position on the y-axis
      */
-    public SpeedBoostEvent(String name, Texture texture, float xPosition, float yPosition) {
+    public SpeedBoostEvent(String name, Texture texture, float xPosition, float yPosition, EventCounter eventCounter) {
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
@@ -36,6 +37,7 @@ public class SpeedBoostEvent implements Event{
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.active = true;
+        this.eventCounter = eventCounter;
     }
 
     // Checks for player collision
@@ -72,7 +74,7 @@ public class SpeedBoostEvent implements Event{
     @Override
     public void trigger() {
         setTriggered(true);
-        EventCounter.incrementEventsCounter();
+        eventCounter.incrementPosCounter();
     }
 
     // Interface methods

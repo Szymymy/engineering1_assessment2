@@ -1,7 +1,5 @@
 package io.github.some_example_name;
 
-import com.badlogic.gdx.math.Rectangle;
-
 /* This interface manages the multiple events that appear in the game
      * 
      * Each event is named and has a location.

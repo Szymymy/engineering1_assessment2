@@ -12,24 +12,26 @@ public class TripwireEvent implements Event{
     private boolean isTriggered;
     private Rectangle tripWireZone;
     private Door doorToLock;
+    private EventCounter eventCounter;
 
     /* Constructor
     * @param name - Name of the event
     * @param zone - Position of the event
     * @param door - The door used by the event
     * isTriggered set to false by default*/
-    public TripwireEvent(String name, Rectangle zone, Door door){
+    public TripwireEvent(String name, Rectangle zone, Door door, EventCounter eventCounter){
         this.name = name;
         this.tripWireZone = zone;
         this.doorToLock = door;
         this.isTriggered = false;
+        this.eventCounter = eventCounter;
     }
 
     @Override
     public void trigger(){
         if (!isTriggered){
             doorToLock.lock();
-            EventCounter.incrementEventsCounter();
+            eventCounter.incrementNegCounter();
             isTriggered = true;
         }
     }

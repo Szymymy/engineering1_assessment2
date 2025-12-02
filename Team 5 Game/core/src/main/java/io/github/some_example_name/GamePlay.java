@@ -64,6 +64,8 @@ public class GamePlay implements Screen {
     Label label;
     Label boostLabel;
     Label pausedLabel;
+    Label eventCountLabel;
+
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
     Label.LabelStyle yellowStyle;
@@ -86,6 +88,9 @@ public class GamePlay implements Screen {
 
     // Points
     Points points = new Points();
+
+    // Event Counter
+    EventCounter eventCounter = new EventCounter();
 
     // constructor
     public GamePlay(final Main game) {
@@ -128,7 +133,7 @@ public class GamePlay implements Screen {
         player = new Player(playerTexture, 775, 100, walls, 40, 40);
 
         // speedboost
-        speedBoost = new SpeedBoostEvent("SpeedBoost", speedBoostTexture, 680, 490);
+        speedBoost = new SpeedBoostEvent("SpeedBoost", speedBoostTexture, 680, 490, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -140,11 +145,11 @@ public class GamePlay implements Screen {
 
         // key
         Rectangle keyZone = new Rectangle(1472, 480, 35, 35);
-        key = new KeyEvent("Keycard", keyZone, keyTexture);
+        key = new KeyEvent("Keycard", keyZone, keyTexture, eventCounter);
 
         // tripwire
         Rectangle tripWireZone = new Rectangle(384, 480, 32, 64);
-        tripWire = new TripwireEvent("tripwire", tripWireZone, door);
+        tripWire = new TripwireEvent("tripwire", tripWireZone, door, eventCounter);
 
         finishZone = new Rectangle(0, 864, 32, 128);
 
@@ -160,10 +165,12 @@ public class GamePlay implements Screen {
         greenStyle = new Label.LabelStyle(font, Color.GREEN);
         label = new Label(String.format("%.1f", timer), greenStyle);
         boostLabel = new Label(String.format("%.1f", boostTimer), greenStyle);
+        eventCountLabel = new Label("POS: 0 / HID: 0 / NEG: 0", greenStyle);
         pausedLabel = new Label("PAUSED", greenStyle);
 
         label.setPosition(900, 1000); // At the top of the screen
         boostLabel.setPosition(500, 1000);
+        eventCountLabel.setPosition(1200, 1000);
         pausedLabel.setPosition(900, 500); // Displayed at the centre of the screen
 
         stage.addActor(pausedLabel);
@@ -183,6 +190,7 @@ public class GamePlay implements Screen {
         stage.addActor(pausedLabel);
         stage.addActor(label);
         stage.addActor(boostLabel);
+        stage.addActor(eventCountLabel);
         pausedLabel.setVisible(false);
 
         System.out.println("GamePlay screen loaded successfully");
@@ -207,6 +215,7 @@ public class GamePlay implements Screen {
             input();
             logic();
             updateTimer(delta);
+            updateEventCount();
             speedBoost();
             dean.update();
         }
@@ -320,7 +329,7 @@ public class GamePlay implements Screen {
     * @param hasWon - If true, the good ending screen is shown.
     * The bad ending screen is shown if false.*/
     public void gameOver(boolean hasWon) {
-        EventCounter.resetEventsCounter();
+        eventCounter.resetEventsCounter();
         System.out.println("Game Over!");
         if (hasWon) {
             points.calcPoints(timer);
@@ -360,6 +369,14 @@ public class GamePlay implements Screen {
                 speedBoostActive = false;
             }
         }
+    }
+
+    // Updates the event counter in game.
+    private void updateEventCount() {
+        int[] eventCount = eventCounter.getEventsCounter();
+        eventCountLabel.setText("POS:"+eventCount[0]+
+                                " / HID:"+eventCount[1]+
+                                " / NEG:"+eventCount[2]);
     }
 
     public void togglePause() {

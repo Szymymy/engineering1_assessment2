@@ -17,6 +17,7 @@ public class KeyEvent implements Event {
     private boolean isTriggered;
     private Rectangle keyCollision;
     private Texture texture;
+    private EventCounter eventCounter;
 
     /* Constructor
      * @param x - Position on x-axis
@@ -25,11 +26,12 @@ public class KeyEvent implements Event {
      * @param height - height of the key
      * @param texture - The texture of the key (keycard)
      */
-    public KeyEvent(String name, Rectangle keyZone, Texture texture) {
+    public KeyEvent(String name, Rectangle keyZone, Texture texture, EventCounter eventCounter) {
         this.name = name;
         this.keyCollision = keyZone;
         this.texture = texture;
         this.isTriggered = false;
+        this.eventCounter = eventCounter;
     }
 
 
@@ -49,7 +51,7 @@ public class KeyEvent implements Event {
     public void trigger() {
         if (!isTriggered()) {
             setTriggered(true);
-            EventCounter.incrementEventsCounter();
+            eventCounter.incrementHidCounter();
         }
     }
 

@@ -92,6 +92,9 @@ public class GamePlay implements Screen {
     // Event Counter
     EventCounter eventCounter = new EventCounter();
 
+    // Leaderboard
+    Leaderboard leaderboard = new Leaderboard();
+
     // constructor
     public GamePlay(final Main game) {
         this.main = game;
@@ -329,6 +332,8 @@ public class GamePlay implements Screen {
     * @param hasWon - If true, the good ending screen is shown.
     * The bad ending screen is shown if false.*/
     public void gameOver(boolean hasWon) {
+        leaderboard.updateLeaderboard(999, "DEF");
+        System.out.println(leaderboard.getLeaderboard()[0]);
         eventCounter.resetEventsCounter();
         System.out.println("Game Over!");
         if (hasWon) {

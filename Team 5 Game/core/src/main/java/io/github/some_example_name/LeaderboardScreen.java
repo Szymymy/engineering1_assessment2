@@ -13,12 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class LeaderboardScreen implements Screen {
-
     private final Main main;
-    private Stage leaderboardStage;
+    private Stage stage;
     private BitmapFont buttonsFont;
-    private Texture leaderboardBackground;
-    private Texture menuButtonTexture, hoverMenuButtonTexture;
+    private Texture background;
+    private Texture exitButtonTexture, hoverExitButtonTexture;
 
     public LeaderboardScreen(final Main game) {
         this.main = game;
@@ -37,7 +36,16 @@ public class LeaderboardScreen implements Screen {
     }
 
     private void ShowScreen() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+        TextButton exitButton = new TextButton("", buttonStyle);
+    }
 
+    private ClickListener makeExitButtonListener() {
+        return new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {main.mainMenu();}
+        };
     }
 
     @Override
@@ -50,7 +58,13 @@ public class LeaderboardScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(leaderboardStage);
+        
+        
+        
+        Gdx.input.setInputProcessor(stage);
+
+
+
     }
 
     @Override

@@ -38,6 +38,9 @@ public class Main extends Game {
     // Method to start the game
     public void startGame() {setScreen(new GamePlay(this)); }
 
+    // Method to return to menu
+    public void mainMenu() {setScreen(new MainMenu(this));}
+
     /* Two methods responsible for ending the game.
      * endGame(): Called when the player loses the game
      * winGame(): Called when the player wind the game

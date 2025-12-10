@@ -17,11 +17,24 @@ In addition we have also provided the game files for you to play.
 - [Risk assessment and mitigation document](Risk_Assesment_and_Mitigation.pdf)
 - [Implementation document](Licensing.pdf)
 
+
+## updated project documents by team 6
+- [new requirements document](https://docs.google.com/document/d/1M9yuUG_KUc_mqGkAkrzoFJHMOgUomY04MMbUulow57U/edit?tab=t.0)
+- [new Architecture document](https://docs.google.com/document/d/1-MtzgJgA7b15F1p1XPPaaiK7pFcKPXci256woZC-xLw/edit?pli=1&tab=t.0)
+- [new Method selection and planning document](https://docs.google.com/document/d/1MZCkS7PhAO-snd9vU-wM0Hwimc-s3bHzZntSn9ziaBs/edit?tab=t.0)
+- [new Risk assessment and mitigation document](https://docs.google.com/document/d/1WgyR4WtIbvC3NdEMEVUKwR2XFLAHHzYzvjHXm5jX2VY/edit?tab=t.0)
+- [new Implementation document](https://docs.google.com/document/d/14OnY8ed3lzr4Nm2iBjnIIyKYcgpf6qTfb9mJEUcsDsk/edit?tab=t.0)
 ## Executable code 
 - [Download Team_5_Game.jar](https://github.com/thomas-nolan/Engineering-1.github.io/raw/main/team-5/Team_5_Game.jar)
 
 ## Source files for the game
 - [Github repository](https://github.com/thomas-nolan/Engineering-1.github.io)
+
+## Updated Executable code
+-[Download updated team 5 game by team 6.jar](added when done)
+
+## Updated game files by team 6
+- [Github repository](https://github.com/Szymymy/engineering1_assessment2)
 
 --------------------------------------------------------
 ## Project Plan Evolution 
@@ -143,8 +156,13 @@ The second implementation improved the structure by:
 
 
 <div align="center">
+
+
+
   <img src="https://github.com/user-attachments/assets/1924fdae-6ada-4640-aa17-a8f148f57866" width="70%" alt="Refined Architecture Diagram" />
 </div>
 
 ---
+
+### Software Testing place holder done by team 6
 

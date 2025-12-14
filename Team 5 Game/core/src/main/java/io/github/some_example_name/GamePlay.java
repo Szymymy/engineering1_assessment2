@@ -38,12 +38,14 @@ public class GamePlay implements Screen {
     Texture deanTexture;
     Texture deanAreaDebug;
     Texture alarmClockTexture;
+    Texture dodgyTakeawayTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
     Player player;
     SpeedBoostEvent speedBoost;
     AlarmClockEvent alarmClock;
+    DodgyTakeawayEvent dodgyTakeaway;
 
     // map
     FitViewport viewport;
@@ -58,6 +60,7 @@ public class GamePlay implements Screen {
     // UI
     boolean isPaused;
     boolean speedBoostActive = false;
+    boolean inputInvertedActive = false;
     Stage stage;
     Skin skin;
     Label label;
@@ -73,6 +76,7 @@ public class GamePlay implements Screen {
     // Timer
     double timer = 300.0;
     double boostTimer = 30f; // For speed boost
+    double inputInvertedTimer = 20f; // For dodgy takeaway input inversion
 
     // Doors
     private List<Door> doors = new ArrayList<>();
@@ -116,6 +120,8 @@ public class GamePlay implements Screen {
         deanTexture = new Texture(Gdx.files.internal("dean.png"));
         // TODO: Replace with actual alarm clock texture when available
         alarmClockTexture = new Texture(Gdx.files.internal("alarm.png")); // Placeholder texture
+        // TODO: Replace with actual dodgy takeaway texture when available
+        dodgyTakeawayTexture = new Texture(Gdx.files.internal("dodgy_takeaway.png")); // Placeholder texture
 
         System.out.println("Textures loaded successfully");
 
@@ -138,6 +144,9 @@ public class GamePlay implements Screen {
 
         // alarm clock (placeholder coordinates - TODO: set actual position)
         alarmClock = new AlarmClockEvent("AlarmClock", alarmClockTexture, 950, 650, eventCounter);
+
+        // dodgy takeaway (TODO: placeholder coordinates - set actual position)
+        dodgyTakeaway = new DodgyTakeawayEvent("DodgyTakeaway", dodgyTakeawayTexture, 420, 820, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -214,6 +223,7 @@ public class GamePlay implements Screen {
             updateEventCount();
             speedBoost();
             alarmClock();
+            dodgyTakeaway();
             dean.update();
         }
         draw();
@@ -235,6 +245,18 @@ public class GamePlay implements Screen {
         if (!alarmClock.isTriggered() && alarmClock.checkCollision(player)) {
             alarmClock.trigger();
             timer += 30.0; // Add 30 seconds to the timer
+        }
+    }
+
+    /* Handles dodgy takeaway event collision and triggering
+     * When the player collects the dodgy takeaway, it inverts input for 20 seconds
+     */
+    public void dodgyTakeaway() {
+        if (!dodgyTakeaway.isTriggered() && dodgyTakeaway.checkCollision(player)) {
+            dodgyTakeaway.trigger();
+            inputInvertedActive = true;
+            inputInvertedTimer = 20f; // Reset timer to 20 seconds
+            player.setInputInverted(true);
         }
     }
 
@@ -303,6 +325,11 @@ public class GamePlay implements Screen {
         //draw alarm clock if not collected
         if (!alarmClock.isTriggered()) {
             alarmClock.draw(spriteBatch);
+        }
+
+        //draw dodgy takeaway if not collected
+        if (!dodgyTakeaway.isTriggered()) {
+            dodgyTakeaway.draw(spriteBatch);
         }
 
         //draw list of doors
@@ -381,6 +408,14 @@ public class GamePlay implements Screen {
                 speedBoostActive = false;
             }
         }
+        // Updates input inversion timer
+        if (inputInvertedActive) {
+            inputInvertedTimer -= delta;
+            if (inputInvertedTimer <= 0) {
+                player.setInputInverted(false);
+                inputInvertedActive = false;
+            }
+        }
     }
 
     // Updates the event counter in game.
@@ -408,6 +443,7 @@ public class GamePlay implements Screen {
         doorTexture.dispose();
         speedBoost.dispose();
         alarmClock.dispose();
+        dodgyTakeaway.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

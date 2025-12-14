@@ -18,9 +18,18 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -61,6 +70,7 @@ public class GamePlay implements Screen {
     boolean isPaused;
     boolean speedBoostActive = false;
     boolean inputInvertedActive = false;
+    boolean examActive = false;
     Stage stage;
     Skin skin;
     Label label;
@@ -83,6 +93,7 @@ public class GamePlay implements Screen {
     private TripwireEvent tripWire;
     private KeyEvent key;
     private boolean hasKey = false;
+    private ExamEvent exam;
 
     // Dean
     private Dean dean;
@@ -164,6 +175,10 @@ public class GamePlay implements Screen {
         Rectangle tripWireZone = new Rectangle(384, 480, 32, 64);
         tripWire = new TripwireEvent("tripwire", tripWireZone, door, eventCounter);
 
+        // exam
+        Rectangle examZone = new Rectangle(900, 800, 50, 50);
+        exam = new ExamEvent("Exam", examZone, eventCounter);
+
         finishZone = new Rectangle(0, 864, 32, 128);
 
         // Set up UI (only game UI, no menu)
@@ -198,6 +213,9 @@ public class GamePlay implements Screen {
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
 
+        // Set input processor for UI interactions (needed for exam dialog)
+        Gdx.input.setInputProcessor(stage);
+
         System.out.println("GamePlay screen loaded successfully");
     }
 
@@ -216,7 +234,7 @@ public class GamePlay implements Screen {
 
         // No menu check - just show the game directly
         togglePause();
-        if (!isPaused) {
+        if (!isPaused && !examActive) {
             input();
             logic();
             updateTimer(delta);
@@ -224,6 +242,7 @@ public class GamePlay implements Screen {
             speedBoost();
             alarmClock();
             dodgyTakeaway();
+            checkExam();
             dean.update();
         }
         draw();
@@ -258,6 +277,215 @@ public class GamePlay implements Screen {
             inputInvertedTimer = 20f; // Reset timer to 20 seconds
             player.setInputInverted(true);
         }
+    }
+
+    /* Handles exam event collision and triggering
+     * When the player enters the exam zone, shows the exam popup
+     */
+    public void checkExam() {
+        if (!exam.isTriggered() && exam.checkTrigger(player.getCollision())) {
+            examActive = true;
+            isPaused = true; // Pause game during exam
+            showExamDialog();
+        }
+    }
+
+    /* Shows the exam dialog popup with questions
+     * Displays one question at a time with 4 answer options
+     */
+    private void showExamDialog() {
+        List<Question> questions = exam.getQuestions();
+        final int[] currentQuestionIndex = {0};
+        final int[] correctAnswers = {0};
+        
+        showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
+    }
+
+    /* Displays a single question dialog
+     * @param questions - List of all questions
+     * @param currentQuestionIndex - Array with current question index (mutable)
+     * @param correctAnswers - Array with count of correct answers (mutable)
+     */
+    private void showQuestionDialog(List<Question> questions, final int[] currentQuestionIndex, final int[] correctAnswers) {
+        if (currentQuestionIndex[0] >= questions.size()) {
+            // All questions answered, calculate score
+            finishExam(correctAnswers[0]);
+            return;
+        }
+
+        Question question = questions.get(currentQuestionIndex[0]);
+        String[] options = question.getOptions();
+
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture whiteTexture = new Texture(pixmap);
+        pixmap.dispose();
+        NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(whitePatch);
+        
+        Window examWindow = new Window("Exam Question " + (currentQuestionIndex[0] + 1) + "/5", windowStyle);
+        examWindow.setModal(true);
+        examWindow.setMovable(false);
+
+        // Set window size and position (centered)
+        float windowWidth = 900;
+        float windowHeight = 600;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        examWindow.setSize(windowWidth, windowHeight);
+        examWindow.setPosition(windowX, windowY);
+        
+        // Adjust padding to prevent title from being cut off
+        examWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.pad(20);
+        table.padTop(50); // Extra top padding to account for title
+
+        // Question label (use smaller font for better readability, black text on white background)
+        BitmapFont questionFont = new BitmapFont();
+        questionFont.getData().setScale(1.8f);
+        Label questionLabel = new Label(question.questionText, new Label.LabelStyle(questionFont, Color.BLACK));
+        questionLabel.setWrap(true);
+        table.add(questionLabel).colspan(2).padBottom(40).width(windowWidth - 80).height(100);
+        table.row();
+
+        // Create 4 answer buttons
+        for (int i = 0; i < 4; i++) {
+            final int answerIndex = i;
+            TextButton answerButton = new TextButton(options[i], skin);
+            answerButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    // Check if answer is correct
+                    if (question.isCorrect(answerIndex)) {
+                        correctAnswers[0]++;
+                    }
+                    
+                    // Remove current window
+                    examWindow.remove();
+                    stage.getRoot().removeActor(examWindow);
+                    
+                    // Show next question or finish
+                    currentQuestionIndex[0]++;
+                    showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
+                }
+            });
+            table.add(answerButton).width(350).height(60).pad(10);
+            if (i % 2 == 1) {
+                table.row();
+            }
+        }
+
+        examWindow.add(table);
+        stage.addActor(examWindow);
+    }
+
+    /* Finishes the exam and applies points based on score
+     * Shows result dialog with pass/fail message
+     * @param correctCount - Number of correct answers (out of 5)
+     */
+    private void finishExam(int correctCount) {
+        boolean passed = correctCount >= 3;
+        
+        // Apply points
+        if (passed) {
+            points.addPoints(100); // Bonus points for passing
+        } else {
+            points.subtractPoints(50); // Penalty for failing
+        }
+        
+        // Show result dialog
+        showExamResultDialog(correctCount, passed);
+    }
+    
+    /* Shows the exam result dialog with pass/fail message
+     * @param correctCount - Number of correct answers
+     * @param passed - Whether the player passed (>=3 correct)
+     */
+    private void showExamResultDialog(int correctCount, boolean passed) {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture whiteTexture = new Texture(pixmap);
+        pixmap.dispose();
+        NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(whitePatch);
+        
+        Window resultWindow = new Window("Exam Results", windowStyle);
+        resultWindow.setModal(true);
+        resultWindow.setMovable(false);
+        
+        // Set window size and position (centered)
+        float windowWidth = 700;
+        float windowHeight = 400;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        resultWindow.setSize(windowWidth, windowHeight);
+        resultWindow.setPosition(windowX, windowY);
+        
+        // Adjust padding to prevent title from being cut off
+        resultWindow.padTop(40); // Extra padding at top for title
+        
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.pad(30);
+        table.padTop(50); // Extra top padding to account for title
+        
+        // Result message
+        BitmapFont resultFont = new BitmapFont();
+        resultFont.getData().setScale(2.0f);
+        Color resultColor = passed ? Color.GREEN : Color.RED;
+        String resultMessage = passed ? "PASSED!" : "FAILED!";
+        String scoreMessage = "You got " + correctCount + " out of 5 questions correct.";
+        String pointsMessage = passed ? "+100 points" : "-50 points";
+        
+        Label resultLabel = new Label(resultMessage, new Label.LabelStyle(resultFont, resultColor));
+        table.add(resultLabel).padBottom(20);
+        table.row();
+        
+        // Score message
+        BitmapFont scoreFont = new BitmapFont();
+        scoreFont.getData().setScale(1.5f);
+        Label scoreLabel = new Label(scoreMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
+        table.add(scoreLabel).padBottom(15);
+        table.row();
+        
+        // Points message
+        Label pointsLabel = new Label(pointsMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
+        table.add(pointsLabel).padBottom(30);
+        table.row();
+        
+        // Close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                resultWindow.remove();
+                stage.getRoot().removeActor(resultWindow);
+                examActive = false;
+                isPaused = false;
+                exam.setExamActive(false);
+            }
+        });
+        table.add(closeButton).width(200).height(50);
+        
+        resultWindow.add(table);
+        stage.addActor(resultWindow);
     }
 
     /* Changes the player speed by a modifier given as parameter

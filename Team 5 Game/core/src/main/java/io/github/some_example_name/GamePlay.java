@@ -3,8 +3,6 @@ package io.github.some_example_name;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.events.EventException;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -25,7 +23,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /* This class handles the main game screen.
  * This class creates the map, player, dean
@@ -40,11 +37,13 @@ public class GamePlay implements Screen {
     Texture keyTexture;
     Texture deanTexture;
     Texture deanAreaDebug;
+    Texture alarmClockTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
     Player player;
     SpeedBoostEvent speedBoost;
+    AlarmClockEvent alarmClock;
 
     // map
     FitViewport viewport;
@@ -115,6 +114,8 @@ public class GamePlay implements Screen {
         doorTexture = new Texture(Gdx.files.internal("door1.png"));
         keyTexture = new Texture(Gdx.files.internal("keycard1.png"));
         deanTexture = new Texture(Gdx.files.internal("dean.png"));
+        // TODO: Replace with actual alarm clock texture when available
+        alarmClockTexture = new Texture(Gdx.files.internal("alarm.png")); // Placeholder texture
 
         System.out.println("Textures loaded successfully");
 
@@ -135,6 +136,9 @@ public class GamePlay implements Screen {
         // speedboost
         speedBoost = new SpeedBoostEvent("SpeedBoost", speedBoostTexture, 680, 490, eventCounter);
 
+        // alarm clock (placeholder coordinates - TODO: set actual position)
+        alarmClock = new AlarmClockEvent("AlarmClock", alarmClockTexture, 950, 650, eventCounter);
+
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
 
@@ -154,7 +158,8 @@ public class GamePlay implements Screen {
         finishZone = new Rectangle(0, 864, 32, 128);
 
         // Set up UI (only game UI, no menu)
-        stage = new Stage(new ScreenViewport());
+        // Use FitViewport to match the game viewport for consistent coordinates
+        stage = new Stage(new FitViewport(1600, 1120));
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         font = new BitmapFont();
@@ -168,29 +173,20 @@ public class GamePlay implements Screen {
         eventCountLabel = new Label("POS: 0 / HID: 0 / NEG: 0", greenStyle);
         pausedLabel = new Label("PAUSED", greenStyle);
 
-        label.setPosition(900, 1000); // At the top of the screen
-        boostLabel.setPosition(500, 1000);
-        eventCountLabel.setPosition(1200, 1000);
-        pausedLabel.setPosition(900, 500); // Displayed at the centre of the screen
+        // Position labels within the 1600x1120 coordinate system
+        label.setPosition(700, 1050); // Timer at the top center
+        boostLabel.setPosition(300, 1050); // Boost timer on the left
+        eventCountLabel.setPosition(1000, 1050); // Event counter on the right
+        pausedLabel.setPosition(700, 560); // Paused label at center (1120/2 = 560)
 
-        stage.addActor(pausedLabel);
-        stage.addActor(label);
-        boostLabel.setVisible(false);
-        pausedLabel.setVisible(false);
-
-        mapRenderer = new OrthogonalTiledMapRenderer(map);
-
-        // Set up UI (only game UI, no menu)
-        stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-        font = new BitmapFont();
-        font.getData().setScale(2.5f);
-        label.setPosition(900, 1000); // At the top of the screen
-        pausedLabel.setPosition(900, 500); // Displayed at the centre of the screen
-        stage.addActor(pausedLabel);
+        // Add all labels to stage
         stage.addActor(label);
         stage.addActor(boostLabel);
         stage.addActor(eventCountLabel);
+        stage.addActor(pausedLabel);
+        
+        // Set initial visibility
+        boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
 
         System.out.println("GamePlay screen loaded successfully");
@@ -217,6 +213,7 @@ public class GamePlay implements Screen {
             updateTimer(delta);
             updateEventCount();
             speedBoost();
+            alarmClock();
             dean.update();
         }
         draw();
@@ -228,6 +225,16 @@ public class GamePlay implements Screen {
             boostLabel.setVisible(true);
             speedBoostActive = true;
             modifySpeed(2); // Doubles player speed
+        }
+    }
+
+    /* Handles alarm clock event collision and triggering
+     * When the player collects the alarm clock, it adds 30 seconds to the timer
+     */
+    public void alarmClock() {
+        if (!alarmClock.isTriggered() && alarmClock.checkCollision(player)) {
+            alarmClock.trigger();
+            timer += 30.0; // Add 30 seconds to the timer
         }
     }
 
@@ -291,6 +298,11 @@ public class GamePlay implements Screen {
         //only draw when the player has not collected yet
         if (!speedBoost.isTriggered()) {
             speedBoost.draw(spriteBatch);
+        }
+
+        //draw alarm clock if not collected
+        if (!alarmClock.isTriggered()) {
+            alarmClock.draw(spriteBatch);
         }
 
         //draw list of doors
@@ -395,6 +407,7 @@ public class GamePlay implements Screen {
         playerTexture.dispose();
         doorTexture.dispose();
         speedBoost.dispose();
+        alarmClock.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

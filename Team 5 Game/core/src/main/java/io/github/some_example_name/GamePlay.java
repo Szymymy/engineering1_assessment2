@@ -49,6 +49,7 @@ public class GamePlay implements Screen {
     Texture alarmClockTexture;
     Texture dodgyTakeawayTexture;
     Texture teacherTexture;
+    Texture friendTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -57,6 +58,7 @@ public class GamePlay implements Screen {
     AlarmClockEvent alarmClock;
     DodgyTakeawayEvent dodgyTakeaway;
     RecommendationLetterEvent recommendationLetter;
+    AnnoyingFriendEvent annoyingFriend;
 
     // map
     FitViewport viewport;
@@ -74,6 +76,7 @@ public class GamePlay implements Screen {
     boolean inputInvertedActive = false;
     boolean examActive = false;
     boolean recommendationLetterActive = false;
+    boolean annoyingFriendActive = false;
     Stage stage;
     Skin skin;
     Label label;
@@ -81,6 +84,7 @@ public class GamePlay implements Screen {
     Label pausedLabel;
     Label eventCountLabel;
     Label scoreMultipliedLabel;
+    Label annoyingFriendLabel;
 
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
@@ -91,6 +95,7 @@ public class GamePlay implements Screen {
     double timer = 300.0;
     double boostTimer = 30f; // For speed boost
     double inputInvertedTimer = 20f; // For dodgy takeaway input inversion
+    double annoyingFriendTimer = 15f; // For annoying friend effect
 
     // Doors
     private List<Door> doors = new ArrayList<>();
@@ -138,6 +143,7 @@ public class GamePlay implements Screen {
         // TODO: Replace with actual dodgy takeaway texture when available
         dodgyTakeawayTexture = new Texture(Gdx.files.internal("dodgy_takeaway.png")); // Placeholder texture
         teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
+        friendTexture = new Texture(Gdx.files.internal("friend.png"));
 
         System.out.println("Textures loaded successfully");
 
@@ -166,6 +172,9 @@ public class GamePlay implements Screen {
 
         // recommendation letter (teacher) - TODO: placeholder coordinates
         recommendationLetter = new RecommendationLetterEvent("RecommendationLetter", teacherTexture, 1070, 200, eventCounter);
+
+        // annoying friend - TODO: placeholder coordinates
+        annoyingFriend = new AnnoyingFriendEvent("AnnoyingFriend", friendTexture, 800, 300, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -205,6 +214,7 @@ public class GamePlay implements Screen {
         eventCountLabel = new Label("POS: 0 / HID: 0 / NEG: 0", greenStyle);
         pausedLabel = new Label("PAUSED", greenStyle);
         scoreMultipliedLabel = new Label("Score is permanently multiplied!", greenStyle);
+        annoyingFriendLabel = new Label("Annoying friend following you!", redStyle);
 
         // Position labels within the 1600x1120 coordinate system
         label.setPosition(700, 1050); // Timer at the top center
@@ -212,6 +222,7 @@ public class GamePlay implements Screen {
         eventCountLabel.setPosition(1000, 1050); // Event counter on the right
         pausedLabel.setPosition(700, 560); // Paused label at center (1120/2 = 560)
         scoreMultipliedLabel.setPosition(50, 1050); // Left of timer, same height
+        annoyingFriendLabel.setPosition(50, 1000); // Below score multiplied label
 
         // Add all labels to stage
         stage.addActor(label);
@@ -219,11 +230,13 @@ public class GamePlay implements Screen {
         stage.addActor(eventCountLabel);
         stage.addActor(pausedLabel);
         stage.addActor(scoreMultipliedLabel);
+        stage.addActor(annoyingFriendLabel);
         
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
         scoreMultipliedLabel.setVisible(false);
+        annoyingFriendLabel.setVisible(false);
 
         // Set input processor for UI interactions (needed for exam dialog)
         Gdx.input.setInputProcessor(stage);
@@ -246,7 +259,7 @@ public class GamePlay implements Screen {
 
         // No menu check - just show the game directly
         togglePause();
-        if (!isPaused && !examActive && !recommendationLetterActive) {
+        if (!isPaused && !examActive && !recommendationLetterActive && !annoyingFriendActive) {
             input();
             logic();
             updateTimer(delta);
@@ -256,7 +269,12 @@ public class GamePlay implements Screen {
             dodgyTakeaway();
             checkExam();
             checkRecommendationLetter();
+            checkAnnoyingFriend();
             dean.update();
+            // Update annoying friend position (follows player when active)
+            if (annoyingFriend.isFollowing()) {
+                annoyingFriend.update(player, delta);
+            }
         }
         draw();
     }
@@ -278,6 +296,82 @@ public class GamePlay implements Screen {
             alarmClock.trigger();
             timer += 30.0; // Add 30 seconds to the timer
         }
+    }
+
+    /* Handles annoying friend event collision and triggering
+     * When the player collides with the annoying friend, they follow and slow them down for 15 seconds
+     */
+    public void checkAnnoyingFriend() {
+        if (!annoyingFriend.isTriggered() && annoyingFriend.checkCollision(player)) {
+            annoyingFriend.trigger();
+            annoyingFriendActive = true;
+            annoyingFriendTimer = 15f; // Reset timer to 15 seconds
+            annoyingFriendLabel.setVisible(true);
+            // Slow down the player by half
+            modifySpeed(0.5f);
+            showAnnoyingFriendDialog();
+        }
+    }
+
+    /* Shows the annoying friend dialog popup
+     * Displays a message that the friend will be annoying for 15 seconds
+     */
+    private void showAnnoyingFriendDialog() {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+        
+        Window friendWindow = new Window("Annoying Friend", windowStyle);
+        friendWindow.setModal(true);
+        friendWindow.setMovable(false);
+        friendWindow.setResizable(false);
+        
+        // Set window size and position (centered using viewport coordinates)
+        float windowWidth = 600;
+        float windowHeight = 250;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        friendWindow.setSize(windowWidth, windowHeight);
+        friendWindow.setPosition(windowX, windowY);
+        
+        // Adjust padding to prevent title from being cut off
+        friendWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout - center everything
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+
+        // Message label
+        BitmapFont messageFont = new BitmapFont();
+        messageFont.getData().setScale(1.8f);
+        Label messageLabel = new Label("I will be annoying you for 15 seconds!", new Label.LabelStyle(messageFont, Color.BLACK));
+        table.add(messageLabel).padBottom(20).padTop(20).padRight(80);
+        table.row();
+
+        // OK button
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                friendWindow.remove();
+                stage.getRoot().removeActor(friendWindow);
+                annoyingFriendActive = false;
+            }
+        });
+        table.add(okButton).center().padRight(80);
+        friendWindow.add(table);
+
+        stage.addActor(friendWindow);
     }
 
     /* Handles dodgy takeaway event collision and triggering
@@ -671,6 +765,9 @@ public class GamePlay implements Screen {
         //draw recommendation letter (teacher) - always visible
         recommendationLetter.draw(spriteBatch);
 
+        //draw annoying friend - always visible
+        annoyingFriend.draw(spriteBatch);
+
         //draw list of doors
         for (Door door : doors) {
             door.draw(spriteBatch);
@@ -755,6 +852,16 @@ public class GamePlay implements Screen {
                 inputInvertedActive = false;
             }
         }
+        // Updates annoying friend timer
+        if (annoyingFriend.isFollowing()) {
+            annoyingFriendTimer -= delta;
+            if (annoyingFriendTimer <= 0) {
+                annoyingFriend.stopFollowing();
+                annoyingFriendLabel.setVisible(false);
+                // Restore player speed (multiply by 2 to undo the 0.5 slow)
+                modifySpeed(2f);
+            }
+        }
     }
 
     // Updates the event counter in game.
@@ -784,6 +891,7 @@ public class GamePlay implements Screen {
         alarmClock.dispose();
         dodgyTakeaway.dispose();
         recommendationLetter.dispose();
+        annoyingFriend.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

@@ -13,6 +13,7 @@ public class Points {
     private int baseScore;
     private int penalties;
     private int finalScore;
+    private boolean scoreMultiplied = false;
     /* Points constructor
      *
      * Initialises all points to 0 at the start.
@@ -53,7 +54,24 @@ public class Points {
         if (finalScore < 0){
             finalScore = 0;
         }
+        // Apply score multiplier if active
+        if (scoreMultiplied) {
+            finalScore = (int) (finalScore * 1.5);
+        }
+    }
 
+    /* Sets the score multiplier flag
+     * @param multiplied - Whether score should be multiplied
+     */
+    public void setScoreMultiplied(boolean multiplied) {
+        this.scoreMultiplied = multiplied;
+    }
+
+    /* Gets the score multiplier flag
+     * @return boolean - Whether score is multiplied
+     */
+    public boolean isScoreMultiplied() {
+        return scoreMultiplied;
     }
 
     /* Getter for the final score

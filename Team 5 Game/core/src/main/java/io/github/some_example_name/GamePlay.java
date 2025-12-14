@@ -48,6 +48,7 @@ public class GamePlay implements Screen {
     Texture deanAreaDebug;
     Texture alarmClockTexture;
     Texture dodgyTakeawayTexture;
+    Texture teacherTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -55,6 +56,7 @@ public class GamePlay implements Screen {
     SpeedBoostEvent speedBoost;
     AlarmClockEvent alarmClock;
     DodgyTakeawayEvent dodgyTakeaway;
+    RecommendationLetterEvent recommendationLetter;
 
     // map
     FitViewport viewport;
@@ -71,12 +73,14 @@ public class GamePlay implements Screen {
     boolean speedBoostActive = false;
     boolean inputInvertedActive = false;
     boolean examActive = false;
+    boolean recommendationLetterActive = false;
     Stage stage;
     Skin skin;
     Label label;
     Label boostLabel;
     Label pausedLabel;
     Label eventCountLabel;
+    Label scoreMultipliedLabel;
 
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
@@ -133,6 +137,7 @@ public class GamePlay implements Screen {
         alarmClockTexture = new Texture(Gdx.files.internal("alarm.png")); // Placeholder texture
         // TODO: Replace with actual dodgy takeaway texture when available
         dodgyTakeawayTexture = new Texture(Gdx.files.internal("dodgy_takeaway.png")); // Placeholder texture
+        teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
 
         System.out.println("Textures loaded successfully");
 
@@ -158,6 +163,9 @@ public class GamePlay implements Screen {
 
         // dodgy takeaway (TODO: placeholder coordinates - set actual position)
         dodgyTakeaway = new DodgyTakeawayEvent("DodgyTakeaway", dodgyTakeawayTexture, 420, 820, eventCounter);
+
+        // recommendation letter (teacher) - TODO: placeholder coordinates
+        recommendationLetter = new RecommendationLetterEvent("RecommendationLetter", teacherTexture, 1070, 200, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -196,22 +204,26 @@ public class GamePlay implements Screen {
         boostLabel = new Label(String.format("%.1f", boostTimer), greenStyle);
         eventCountLabel = new Label("POS: 0 / HID: 0 / NEG: 0", greenStyle);
         pausedLabel = new Label("PAUSED", greenStyle);
+        scoreMultipliedLabel = new Label("Score is permanently multiplied!", greenStyle);
 
         // Position labels within the 1600x1120 coordinate system
         label.setPosition(700, 1050); // Timer at the top center
         boostLabel.setPosition(300, 1050); // Boost timer on the left
         eventCountLabel.setPosition(1000, 1050); // Event counter on the right
         pausedLabel.setPosition(700, 560); // Paused label at center (1120/2 = 560)
+        scoreMultipliedLabel.setPosition(50, 1050); // Left of timer, same height
 
         // Add all labels to stage
         stage.addActor(label);
         stage.addActor(boostLabel);
         stage.addActor(eventCountLabel);
         stage.addActor(pausedLabel);
+        stage.addActor(scoreMultipliedLabel);
         
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
+        scoreMultipliedLabel.setVisible(false);
 
         // Set input processor for UI interactions (needed for exam dialog)
         Gdx.input.setInputProcessor(stage);
@@ -234,7 +246,7 @@ public class GamePlay implements Screen {
 
         // No menu check - just show the game directly
         togglePause();
-        if (!isPaused && !examActive) {
+        if (!isPaused && !examActive && !recommendationLetterActive) {
             input();
             logic();
             updateTimer(delta);
@@ -243,6 +255,7 @@ public class GamePlay implements Screen {
             alarmClock();
             dodgyTakeaway();
             checkExam();
+            checkRecommendationLetter();
             dean.update();
         }
         draw();
@@ -288,6 +301,101 @@ public class GamePlay implements Screen {
             isPaused = true; // Pause game during exam
             showExamDialog();
         }
+    }
+
+    /* Handles recommendation letter event collision and triggering
+     * When the player collides with the teacher, shows a popup asking for reference
+     */
+    public void checkRecommendationLetter() {
+        if (!recommendationLetter.hasResponded() && recommendationLetter.checkCollision(player)) {
+            recommendationLetterActive = true;
+            isPaused = true;
+            showRecommendationLetterDialog();
+        }
+    }
+
+    /* Shows the recommendation letter dialog popup
+     * Asks the player if they want to get a reference
+     */
+    private void showRecommendationLetterDialog() {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+        
+        Window recommendationWindow = new Window("Recommendation Letter", windowStyle);
+        recommendationWindow.setModal(true);
+        recommendationWindow.setMovable(false);
+        recommendationWindow.setResizable(false);
+        
+        // Set window size and position (centered using viewport coordinates)
+        float windowWidth = 600;
+        float windowHeight = 300;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        recommendationWindow.setSize(windowWidth, windowHeight);
+        recommendationWindow.setPosition(windowX, windowY);
+        
+        // Adjust padding to prevent title from being cut off
+        recommendationWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout - center everything
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center(); // Center the table content
+
+        // Question label
+        BitmapFont questionFont = new BitmapFont();
+        questionFont.getData().setScale(2f);
+        Label questionLabel = new Label("Do you want to get my reference?", new Label.LabelStyle(questionFont, Color.BLACK));
+        table.add(questionLabel).padBottom(30).padTop(20).padRight(80);
+        table.row();
+
+        // Yes button
+        TextButton yesButton = new TextButton("Yes", skin);
+        yesButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                recommendationLetter.trigger();
+                recommendationLetter.setResponded(true);
+                points.setScoreMultiplied(true);
+                scoreMultipliedLabel.setVisible(true);
+                recommendationWindow.remove();
+                stage.getRoot().removeActor(recommendationWindow);
+                recommendationLetterActive = false;
+                isPaused = false;
+            }
+        });
+
+        // No button
+        TextButton noButton = new TextButton("No", skin);
+        noButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                recommendationLetter.setResponded(true);
+                recommendationWindow.remove();
+                stage.getRoot().removeActor(recommendationWindow);
+                recommendationLetterActive = false;
+                isPaused = false;
+            }
+        });
+
+        // Create a horizontal table for buttons and center it
+        Table buttonRow = new Table();
+        buttonRow.add(yesButton).padRight(30);
+        buttonRow.add(noButton).padRight(80);
+        table.add(buttonRow).center();
+        recommendationWindow.add(table);
+
+        stage.addActor(recommendationWindow);
     }
 
     /* Shows the exam dialog popup with questions
@@ -560,6 +668,9 @@ public class GamePlay implements Screen {
             dodgyTakeaway.draw(spriteBatch);
         }
 
+        //draw recommendation letter (teacher) - always visible
+        recommendationLetter.draw(spriteBatch);
+
         //draw list of doors
         for (Door door : doors) {
             door.draw(spriteBatch);
@@ -672,6 +783,7 @@ public class GamePlay implements Screen {
         speedBoost.dispose();
         alarmClock.dispose();
         dodgyTakeaway.dispose();
+        recommendationLetter.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

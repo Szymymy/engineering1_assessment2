@@ -41,6 +41,9 @@ public class Main extends Game {
     // Method to return to menu
     public void mainMenu() {setScreen(new MainMenu(this));}
 
+    // Method to go to leaderboard screen
+    public void leaderboardScreen() {setScreen(new LeaderboardScreen(this));}
+
     /* Two methods responsible for ending the game.
      * endGame(): Called when the player loses the game
      * winGame(): Called when the player wind the game

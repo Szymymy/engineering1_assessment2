@@ -27,6 +27,7 @@ public class MainMenu implements Screen {
     private Texture startButtonTexture, tutorialButtonTexture, exitButtonTexture;
     private Texture hoverStartButtonTexture, hoverTutorialButtonTexture, hoverExitButtonTexture;
     private Texture tutorialBackgroundTexture, tutorialExitButtonTexture;
+    private Texture leaderboardButtonTexture, hoverLeaderboardButtonTexture;
 
     public MainMenu(final Main game) {
         this.main = game;
@@ -49,9 +50,11 @@ public class MainMenu implements Screen {
         startButtonTexture =  new Texture(Gdx.files.internal("StartButton.png"));
         tutorialButtonTexture =  new Texture(Gdx.files.internal("TutorialButton.png"));
         exitButtonTexture =  new Texture(Gdx.files.internal("ExitButton.png"));
+        leaderboardButtonTexture = new Texture("LeaderboardButton.png");
         hoverStartButtonTexture =  new Texture(Gdx.files.internal("HoverStartButton.png"));
         hoverTutorialButtonTexture =  new Texture(Gdx.files.internal("HoverTutorialButton.png"));
         hoverExitButtonTexture =  new Texture(Gdx.files.internal("HoverExitButton.png"));
+        hoverLeaderboardButtonTexture = new Texture(Gdx.files.internal("HoverLeaderboardButton.png"));
         tutorialExitButtonTexture =  new Texture(Gdx.files.internal("CloseButton.png"));
     }
 
@@ -83,13 +86,16 @@ public class MainMenu implements Screen {
         TextButton startButton = createMainMenuButton(startButtonTexture, hoverStartButtonTexture, 0);
         TextButton tutorialButton = createMainMenuButton(tutorialButtonTexture, hoverTutorialButtonTexture, 1);
         TextButton exitButton = createMainMenuButton(exitButtonTexture, hoverExitButtonTexture, 2);
+        TextButton leaderboardButton = createMainMenuButton(leaderboardButtonTexture, hoverLeaderboardButtonTexture, 3);
 
         startButton.addListener(createStartButtonListener());
         tutorialButton.addListener(createTutorialButtonListener());
         exitButton.addListener(createExitButtonListener());
+        leaderboardButton.addListener(createLeaderboardButtonListener());
         MainMenuStage.addActor(startButton);
         MainMenuStage.addActor(tutorialButton);
         MainMenuStage.addActor(exitButton);
+        MainMenuStage.addActor(leaderboardButton);
     }
 
     private TextButton createMainMenuButton(Texture normalTexture, Texture hoverTexture, int position) {
@@ -97,7 +103,7 @@ public class MainMenu implements Screen {
         TextButton button = new TextButton("", buttonStyle);
 
         float centerX = (Gdx.graphics.getWidth() - 400) / 2;
-        float startY = Gdx.graphics.getHeight() * 0.4f;
+        float startY = (Gdx.graphics.getHeight() + 165) * 0.4f;
         float yPosition = startY - (position * (120 + 40));
 
         button.setBounds(centerX, yPosition, 400, 120);
@@ -122,6 +128,13 @@ public class MainMenu implements Screen {
         return new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {Gdx.app.exit();}
+        };
+    }
+
+    private ClickListener createLeaderboardButtonListener() {
+        return new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {main.leaderboardScreen();}
         };
     }
 

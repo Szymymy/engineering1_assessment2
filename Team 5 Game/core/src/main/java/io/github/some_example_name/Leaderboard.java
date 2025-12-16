@@ -17,7 +17,7 @@ public class Leaderboard {
     /**
      * The array used to store the leaderboard for manipulation.
      */
-    private String[] leaderboard;
+    static private String[] leaderboard;
 
 
     /**

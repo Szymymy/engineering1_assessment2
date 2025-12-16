@@ -50,6 +50,7 @@ public class GamePlay implements Screen {
     Texture dodgyTakeawayTexture;
     Texture teacherTexture;
     Texture friendTexture;
+    Texture longboiTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -59,6 +60,7 @@ public class GamePlay implements Screen {
     DodgyTakeawayEvent dodgyTakeaway;
     RecommendationLetterEvent recommendationLetter;
     AnnoyingFriendEvent annoyingFriend;
+    LongboiCaptureEvent longboiCapture;
 
     // map
     FitViewport viewport;
@@ -77,6 +79,7 @@ public class GamePlay implements Screen {
     boolean examActive = false;
     boolean recommendationLetterActive = false;
     boolean annoyingFriendActive = false;
+    boolean longboiQuestComplete = false;
     Stage stage;
     Skin skin;
     Label label;
@@ -85,6 +88,7 @@ public class GamePlay implements Screen {
     Label eventCountLabel;
     Label scoreMultipliedLabel;
     Label annoyingFriendLabel;
+    Label longboiQuestLabel;
 
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
@@ -144,6 +148,7 @@ public class GamePlay implements Screen {
         dodgyTakeawayTexture = new Texture(Gdx.files.internal("dodgy_takeaway.png")); // Placeholder texture
         teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
         friendTexture = new Texture(Gdx.files.internal("friend.png"));
+        longboiTexture = new Texture(Gdx.files.internal("longboi.png"));
 
         System.out.println("Textures loaded successfully");
 
@@ -175,6 +180,9 @@ public class GamePlay implements Screen {
 
         // annoying friend - TODO: placeholder coordinates
         annoyingFriend = new AnnoyingFriendEvent("AnnoyingFriend", friendTexture, 800, 300, eventCounter);
+
+        // longboi capture (hidden quest - collect 3 longbois)
+        longboiCapture = new LongboiCaptureEvent("LongboiCapture", longboiTexture, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -215,6 +223,7 @@ public class GamePlay implements Screen {
         pausedLabel = new Label("PAUSED", greenStyle);
         scoreMultipliedLabel = new Label("Score is permanently multiplied!", greenStyle);
         annoyingFriendLabel = new Label("Annoying friend following you!", redStyle);
+        longboiQuestLabel = new Label("Longbois: 0/3", yellowStyle);
 
         // Position labels within the 1600x1120 coordinate system
         label.setPosition(700, 1050); // Timer at the top center
@@ -223,6 +232,7 @@ public class GamePlay implements Screen {
         pausedLabel.setPosition(700, 560); // Paused label at center (1120/2 = 560)
         scoreMultipliedLabel.setPosition(50, 1050); // Left of timer, same height
         annoyingFriendLabel.setPosition(50, 1000); // Below score multiplied label
+        longboiQuestLabel.setPosition(50, 950); // Below annoying friend label
 
         // Add all labels to stage
         stage.addActor(label);
@@ -231,12 +241,14 @@ public class GamePlay implements Screen {
         stage.addActor(pausedLabel);
         stage.addActor(scoreMultipliedLabel);
         stage.addActor(annoyingFriendLabel);
+        stage.addActor(longboiQuestLabel);
         
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
         scoreMultipliedLabel.setVisible(false);
         annoyingFriendLabel.setVisible(false);
+        longboiQuestLabel.setVisible(false);
 
         // Set input processor for UI interactions (needed for exam dialog)
         Gdx.input.setInputProcessor(stage);
@@ -259,7 +271,7 @@ public class GamePlay implements Screen {
 
         // No menu check - just show the game directly
         togglePause();
-        if (!isPaused && !examActive && !recommendationLetterActive && !annoyingFriendActive) {
+        if (!isPaused && !examActive && !recommendationLetterActive && !annoyingFriendActive && !longboiQuestComplete) {
             input();
             logic();
             updateTimer(delta);
@@ -270,6 +282,7 @@ public class GamePlay implements Screen {
             checkExam();
             checkRecommendationLetter();
             checkAnnoyingFriend();
+            checkLongboiCapture();
             dean.update();
             // Update annoying friend position (follows player when active)
             if (annoyingFriend.isFollowing()) {
@@ -372,6 +385,103 @@ public class GamePlay implements Screen {
         friendWindow.add(table);
 
         stage.addActor(friendWindow);
+    }
+
+    /* Handles longboi capture hidden quest
+     * When the player collects a longboi, updates count
+     * When all 3 are collected, shows completion dialog
+     */
+    public void checkLongboiCapture() {
+        if (!longboiCapture.isTriggered()) {
+            int collectedIndex = longboiCapture.checkCollision(player);
+            if (collectedIndex >= 0) {
+                boolean questComplete = longboiCapture.collectLongboi(collectedIndex);
+                
+                // Show/update the counter label after first collection
+                longboiQuestLabel.setVisible(true);
+                longboiQuestLabel.setText("Longbois: " + longboiCapture.getCollectedCount() + "/3");
+                
+                if (questComplete) {
+                    showLongboiQuestCompleteDialog();
+                }
+            }
+        }
+    }
+
+    /* Shows the longboi quest completion dialog
+     * Displays congratulations message and gives bonus points
+     */
+    private void showLongboiQuestCompleteDialog() {
+        longboiQuestComplete = true;
+        isPaused = true;
+        
+        // Add bonus points for completing the quest
+        points.addPoints(150);
+        
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+        
+        Window questWindow = new Window("Hidden Quest Complete!", windowStyle);
+        questWindow.setModal(true);
+        questWindow.setMovable(false);
+        questWindow.setResizable(false);
+        
+        // Set window size and position (centered)
+        float windowWidth = 700;
+        float windowHeight = 300;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        questWindow.setSize(windowWidth, windowHeight);
+        questWindow.setPosition(windowX, windowY);
+        questWindow.padTop(40);
+
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+
+        // Message label
+        BitmapFont messageFont = new BitmapFont();
+        messageFont.getData().setScale(1.8f);
+        Label messageLabel = new Label("Hidden quest completed, you got extra points!", new Label.LabelStyle(messageFont, Color.BLACK));
+        table.add(messageLabel).padBottom(30).padTop(20).padRight(80);
+        table.row();
+        
+        // Points message
+        BitmapFont pointsFont = new BitmapFont();
+        pointsFont.getData().setScale(1.5f);
+        Label pointsLabel = new Label("+150 points", new Label.LabelStyle(pointsFont, Color.GREEN));
+        table.add(pointsLabel).padBottom(20).padRight(80);
+        table.row();
+
+        // OK button
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                questWindow.remove();
+                stage.getRoot().removeActor(questWindow);
+                longboiQuestComplete = false;
+                isPaused = false;
+                // Update label to show completion
+                longboiQuestLabel.setText("Longbois: 3/3 - Complete!");
+                longboiQuestLabel.setStyle(greenStyle);
+            }
+        });
+        table.add(okButton).center().padRight(80);
+        questWindow.add(table);
+
+        stage.addActor(questWindow);
     }
 
     /* Handles dodgy takeaway event collision and triggering
@@ -768,6 +878,9 @@ public class GamePlay implements Screen {
         //draw annoying friend - always visible
         annoyingFriend.draw(spriteBatch);
 
+        //draw longbois (only uncollected ones)
+        longboiCapture.draw(spriteBatch);
+
         //draw list of doors
         for (Door door : doors) {
             door.draw(spriteBatch);
@@ -892,6 +1005,8 @@ public class GamePlay implements Screen {
         dodgyTakeaway.dispose();
         recommendationLetter.dispose();
         annoyingFriend.dispose();
+        longboiCapture.dispose();
+        longboiTexture.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

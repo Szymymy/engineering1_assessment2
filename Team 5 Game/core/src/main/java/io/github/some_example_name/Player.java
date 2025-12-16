@@ -23,7 +23,7 @@ import java.util.List;
 public class Player {
     protected Sprite sprite;
     protected Vector2 position;
-    private float playerSpeed = 100f;
+    private float playerSpeed = 70f;
     private Rectangle playerCollision;
     protected int sizeX;
     protected int sizeY;

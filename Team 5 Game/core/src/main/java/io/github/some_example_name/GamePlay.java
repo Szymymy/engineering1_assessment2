@@ -51,6 +51,7 @@ public class GamePlay implements Screen {
     Texture teacherTexture;
     Texture friendTexture;
     Texture longboiTexture;
+    Texture phoneTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -61,6 +62,7 @@ public class GamePlay implements Screen {
     RecommendationLetterEvent recommendationLetter;
     AnnoyingFriendEvent annoyingFriend;
     LongboiCaptureEvent longboiCapture;
+    DoomScrollEvent dooomScroll;
 
     // map
     FitViewport viewport;
@@ -149,7 +151,8 @@ public class GamePlay implements Screen {
         teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
         friendTexture = new Texture(Gdx.files.internal("friend.png"));
         longboiTexture = new Texture(Gdx.files.internal("longboi.png"));
-
+        // placeholder texture can be changed later
+        phoneTexture = new Texture(Gdx.files.internal("phone.png"));
         System.out.println("Textures loaded successfully");
 
         // Load map
@@ -183,6 +186,9 @@ public class GamePlay implements Screen {
 
         // longboi capture (hidden quest - collect 3 longbois)
         longboiCapture = new LongboiCaptureEvent("LongboiCapture", longboiTexture, eventCounter);
+
+        // (placeholder coordinates can be changed later)
+        dooomScroll = new DoomScrollEvent("DoomScroll", phoneTexture,250,250, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -242,7 +248,7 @@ public class GamePlay implements Screen {
         stage.addActor(scoreMultipliedLabel);
         stage.addActor(annoyingFriendLabel);
         stage.addActor(longboiQuestLabel);
-        
+
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
@@ -279,6 +285,7 @@ public class GamePlay implements Screen {
             speedBoost();
             alarmClock();
             dodgyTakeaway();
+            doomScroll();
             checkExam();
             checkRecommendationLetter();
             checkAnnoyingFriend();
@@ -342,12 +349,12 @@ public class GamePlay implements Screen {
         pixmap.dispose();
         NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
         windowStyle.background = new NinePatchDrawable(ninePatch);
-        
+
         Window friendWindow = new Window("Annoying Friend", windowStyle);
         friendWindow.setModal(true);
         friendWindow.setMovable(false);
         friendWindow.setResizable(false);
-        
+
         // Set window size and position (centered using viewport coordinates)
         float windowWidth = 600;
         float windowHeight = 250;
@@ -355,7 +362,7 @@ public class GamePlay implements Screen {
         float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
         friendWindow.setSize(windowWidth, windowHeight);
         friendWindow.setPosition(windowX, windowY);
-        
+
         // Adjust padding to prevent title from being cut off
         friendWindow.padTop(40); // Extra padding at top for title
 
@@ -396,28 +403,83 @@ public class GamePlay implements Screen {
             int collectedIndex = longboiCapture.checkCollision(player);
             if (collectedIndex >= 0) {
                 boolean questComplete = longboiCapture.collectLongboi(collectedIndex);
-                
+
                 // Show/update the counter label after first collection
                 longboiQuestLabel.setVisible(true);
                 longboiQuestLabel.setText("Longbois: " + longboiCapture.getCollectedCount() + "/3");
-                
+
                 if (questComplete) {
                     showLongboiQuestCompleteDialog();
                 }
             }
         }
     }
+    public void doomScroll() {
+        if (!dooomScroll.isTriggered() && dooomScroll.checkCollision(player)) {
+            dooomScroll.trigger();
+            isPaused = true;
+            Window.WindowStyle windowStyle = new Window.WindowStyle();
+            windowStyle.titleFont = font;
+            windowStyle.titleFontColor = Color.BLACK;
+            // Create white background drawable
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.WHITE);
+            pixmap.fill();
+            TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+            pixmap.dispose();
+            NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+            windowStyle.background = new NinePatchDrawable(ninePatch);
 
+            Window doomWindow = new Window("Doom Scrolled", windowStyle);
+            doomWindow.setModal(true);
+            doomWindow.setMovable(false);
+            doomWindow.setResizable(false);
+
+            // Set window size and position (centered using viewport coordinates)
+            float windowWidth = 600;
+            float windowHeight = 300;
+            float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+            float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+            doomWindow.setSize(windowWidth, windowHeight);
+            doomWindow.setPosition(windowX, windowY);
+            // Adjust padding to prevent title from being cut off
+            doomWindow.padTop(40);
+            Table table = new Table();
+            table.center();
+
+            BitmapFont messageFont = new BitmapFont();
+            messageFont.getData().setScale(1.8f);
+            Label messageLabel = new Label("You decided to doomscroll instead of revising, as a result you lose 3000 points", new Label.LabelStyle(messageFont, Color.BLACK));
+            messageLabel.setWrap(true);
+            table.add(messageLabel).width(windowWidth - 120);
+            table.row();
+
+            TextButton okButton = new TextButton("OK", skin);
+            okButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    doomWindow.remove();
+                    stage.getRoot().removeActor(doomWindow);
+                    points.subtractPoints(9000);
+                    isPaused = false;
+                }
+            });
+            table.add(okButton).center().padRight(80);
+            doomWindow.add(table);
+
+            stage.addActor(doomWindow);
+        }
+    }
     /* Shows the longboi quest completion dialog
      * Displays congratulations message and gives bonus points
      */
     private void showLongboiQuestCompleteDialog() {
         longboiQuestComplete = true;
         isPaused = true;
-        
+
         // Add bonus points for completing the quest
         points.addPoints(150);
-        
+
         // Create window with white background
         Window.WindowStyle windowStyle = new Window.WindowStyle();
         windowStyle.titleFont = font;
@@ -430,12 +492,12 @@ public class GamePlay implements Screen {
         pixmap.dispose();
         NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
         windowStyle.background = new NinePatchDrawable(ninePatch);
-        
+
         Window questWindow = new Window("Hidden Quest Complete!", windowStyle);
         questWindow.setModal(true);
         questWindow.setMovable(false);
         questWindow.setResizable(false);
-        
+
         // Set window size and position (centered)
         float windowWidth = 700;
         float windowHeight = 300;
@@ -456,7 +518,7 @@ public class GamePlay implements Screen {
         Label messageLabel = new Label("Hidden quest completed, you got extra points!", new Label.LabelStyle(messageFont, Color.BLACK));
         table.add(messageLabel).padBottom(30).padTop(20).padRight(80);
         table.row();
-        
+
         // Points message
         BitmapFont pointsFont = new BitmapFont();
         pointsFont.getData().setScale(1.5f);
@@ -534,12 +596,12 @@ public class GamePlay implements Screen {
         pixmap.dispose();
         NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
         windowStyle.background = new NinePatchDrawable(ninePatch);
-        
+
         Window recommendationWindow = new Window("Recommendation Letter", windowStyle);
         recommendationWindow.setModal(true);
         recommendationWindow.setMovable(false);
         recommendationWindow.setResizable(false);
-        
+
         // Set window size and position (centered using viewport coordinates)
         float windowWidth = 600;
         float windowHeight = 300;
@@ -547,7 +609,7 @@ public class GamePlay implements Screen {
         float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
         recommendationWindow.setSize(windowWidth, windowHeight);
         recommendationWindow.setPosition(windowX, windowY);
-        
+
         // Adjust padding to prevent title from being cut off
         recommendationWindow.padTop(40); // Extra padding at top for title
 
@@ -609,7 +671,7 @@ public class GamePlay implements Screen {
         List<Question> questions = exam.getQuestions();
         final int[] currentQuestionIndex = {0};
         final int[] correctAnswers = {0};
-        
+
         showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
     }
 
@@ -640,7 +702,7 @@ public class GamePlay implements Screen {
         pixmap.dispose();
         NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
         windowStyle.background = new NinePatchDrawable(whitePatch);
-        
+
         Window examWindow = new Window("Exam Question " + (currentQuestionIndex[0] + 1) + "/5", windowStyle);
         examWindow.setModal(true);
         examWindow.setMovable(false);
@@ -652,7 +714,7 @@ public class GamePlay implements Screen {
         float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
         examWindow.setSize(windowWidth, windowHeight);
         examWindow.setPosition(windowX, windowY);
-        
+
         // Adjust padding to prevent title from being cut off
         examWindow.padTop(40); // Extra padding at top for title
 
@@ -681,11 +743,11 @@ public class GamePlay implements Screen {
                     if (question.isCorrect(answerIndex)) {
                         correctAnswers[0]++;
                     }
-                    
+
                     // Remove current window
                     examWindow.remove();
                     stage.getRoot().removeActor(examWindow);
-                    
+
                     // Show next question or finish
                     currentQuestionIndex[0]++;
                     showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
@@ -707,18 +769,18 @@ public class GamePlay implements Screen {
      */
     private void finishExam(int correctCount) {
         boolean passed = correctCount >= 3;
-        
+
         // Apply points
         if (passed) {
             points.addPoints(100); // Bonus points for passing
         } else {
             points.subtractPoints(50); // Penalty for failing
         }
-        
+
         // Show result dialog
         showExamResultDialog(correctCount, passed);
     }
-    
+
     /* Shows the exam result dialog with pass/fail message
      * @param correctCount - Number of correct answers
      * @param passed - Whether the player passed (>=3 correct)
@@ -736,11 +798,11 @@ public class GamePlay implements Screen {
         pixmap.dispose();
         NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
         windowStyle.background = new NinePatchDrawable(whitePatch);
-        
+
         Window resultWindow = new Window("Exam Results", windowStyle);
         resultWindow.setModal(true);
         resultWindow.setMovable(false);
-        
+
         // Set window size and position (centered)
         float windowWidth = 700;
         float windowHeight = 400;
@@ -748,16 +810,16 @@ public class GamePlay implements Screen {
         float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
         resultWindow.setSize(windowWidth, windowHeight);
         resultWindow.setPosition(windowX, windowY);
-        
+
         // Adjust padding to prevent title from being cut off
         resultWindow.padTop(40); // Extra padding at top for title
-        
+
         // Create table for layout
         Table table = new Table();
         table.setFillParent(true);
         table.pad(30);
         table.padTop(50); // Extra top padding to account for title
-        
+
         // Result message
         BitmapFont resultFont = new BitmapFont();
         resultFont.getData().setScale(2.0f);
@@ -765,23 +827,23 @@ public class GamePlay implements Screen {
         String resultMessage = passed ? "PASSED!" : "FAILED!";
         String scoreMessage = "You got " + correctCount + " out of 5 questions correct.";
         String pointsMessage = passed ? "+100 points" : "-50 points";
-        
+
         Label resultLabel = new Label(resultMessage, new Label.LabelStyle(resultFont, resultColor));
         table.add(resultLabel).padBottom(20);
         table.row();
-        
+
         // Score message
         BitmapFont scoreFont = new BitmapFont();
         scoreFont.getData().setScale(1.5f);
         Label scoreLabel = new Label(scoreMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
         table.add(scoreLabel).padBottom(15);
         table.row();
-        
+
         // Points message
         Label pointsLabel = new Label(pointsMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
         table.add(pointsLabel).padBottom(30);
         table.row();
-        
+
         // Close button
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
@@ -795,7 +857,7 @@ public class GamePlay implements Screen {
             }
         });
         table.add(closeButton).width(200).height(50);
-        
+
         resultWindow.add(table);
         stage.addActor(resultWindow);
     }
@@ -870,6 +932,10 @@ public class GamePlay implements Screen {
         //draw dodgy takeaway if not collected
         if (!dodgyTakeaway.isTriggered()) {
             dodgyTakeaway.draw(spriteBatch);
+        }
+
+        if (!dooomScroll.isTriggered()) {
+            dooomScroll.draw(spriteBatch);
         }
 
         //draw recommendation letter (teacher) - always visible
@@ -1007,6 +1073,7 @@ public class GamePlay implements Screen {
         annoyingFriend.dispose();
         longboiCapture.dispose();
         longboiTexture.dispose();
+        phoneTexture.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

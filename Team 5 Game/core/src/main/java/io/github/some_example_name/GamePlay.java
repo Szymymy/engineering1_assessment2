@@ -91,6 +91,7 @@ public class GamePlay implements Screen {
     Label scoreMultipliedLabel;
     Label annoyingFriendLabel;
     Label longboiQuestLabel;
+    Label achievementLabel;
 
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
@@ -102,6 +103,7 @@ public class GamePlay implements Screen {
     double boostTimer = 30f; // For speed boost
     double inputInvertedTimer = 20f; // For dodgy takeaway input inversion
     double annoyingFriendTimer = 15f; // For annoying friend effect
+    double achievementTimer = 0; // For achievement pop up
 
     // Doors
     private List<Door> doors = new ArrayList<>();
@@ -120,6 +122,9 @@ public class GamePlay implements Screen {
 
     // Event Counter
     EventCounter eventCounter = new EventCounter();
+
+    // Handles achievements
+    Achievements achievements = new Achievements(eventCounter, points);
 
     // constructor
     public GamePlay(final Main game) {
@@ -230,6 +235,7 @@ public class GamePlay implements Screen {
         scoreMultipliedLabel = new Label("Score is permanently multiplied!", greenStyle);
         annoyingFriendLabel = new Label("Annoying friend following you!", redStyle);
         longboiQuestLabel = new Label("Longbois: 0/3", yellowStyle);
+        achievementLabel = new Label("", yellowStyle);
 
         // Position labels within the 1600x1120 coordinate system
         label.setPosition(700, 1050); // Timer at the top center
@@ -239,6 +245,7 @@ public class GamePlay implements Screen {
         scoreMultipliedLabel.setPosition(50, 1050); // Left of timer, same height
         annoyingFriendLabel.setPosition(50, 1000); // Below score multiplied label
         longboiQuestLabel.setPosition(50, 950); // Below annoying friend label
+        achievementLabel.setPosition(50,900); // Achievements appear in the top left of the screen
 
         // Add all labels to stage
         stage.addActor(label);
@@ -248,13 +255,15 @@ public class GamePlay implements Screen {
         stage.addActor(scoreMultipliedLabel);
         stage.addActor(annoyingFriendLabel);
         stage.addActor(longboiQuestLabel);
-
+        stage.addActor(achievementLabel);
+        
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
         scoreMultipliedLabel.setVisible(false);
         annoyingFriendLabel.setVisible(false);
         longboiQuestLabel.setVisible(false);
+        achievementLabel.setVisible(false);
 
         // Set input processor for UI interactions (needed for exam dialog)
         Gdx.input.setInputProcessor(stage);
@@ -296,12 +305,20 @@ public class GamePlay implements Screen {
                 annoyingFriend.update(player, delta);
             }
         }
-        draw();
-    }
+            if (achievementTimer > 0) { // Decrease achievement popup timer and hide message when time runs out
+                achievementTimer -= delta;
+                if (achievementTimer <= 0) {
+                    achievementTimer = 0;
+                    achievementLabel.setVisible(false);
+                }
+            } 
+    draw();
+}
 
     public void speedBoost() {
         if (!speedBoost.isTriggered() && speedBoost.checkCollision(player)) {
             speedBoost.trigger();
+            checkAchievementsAndShowPopup();
             boostLabel.setVisible(true);
             speedBoostActive = true;
             modifySpeed(2); // Doubles player speed
@@ -314,6 +331,7 @@ public class GamePlay implements Screen {
     public void alarmClock() {
         if (!alarmClock.isTriggered() && alarmClock.checkCollision(player)) {
             alarmClock.trigger();
+            checkAchievementsAndShowPopup(); // Checks whether any achievement conditions have been met after an event occurs
             timer += 30.0; // Add 30 seconds to the timer
         }
     }
@@ -324,6 +342,7 @@ public class GamePlay implements Screen {
     public void checkAnnoyingFriend() {
         if (!annoyingFriend.isTriggered() && annoyingFriend.checkCollision(player)) {
             annoyingFriend.trigger();
+            checkAchievementsAndShowPopup();
             annoyingFriendActive = true;
             annoyingFriendTimer = 15f; // Reset timer to 15 seconds
             annoyingFriendLabel.setVisible(true);
@@ -403,7 +422,7 @@ public class GamePlay implements Screen {
             int collectedIndex = longboiCapture.checkCollision(player);
             if (collectedIndex >= 0) {
                 boolean questComplete = longboiCapture.collectLongboi(collectedIndex);
-
+                checkAchievementsAndShowPopup();
                 // Show/update the counter label after first collection
                 longboiQuestLabel.setVisible(true);
                 longboiQuestLabel.setText("Longbois: " + longboiCapture.getCollectedCount() + "/3");
@@ -417,6 +436,7 @@ public class GamePlay implements Screen {
     public void doomScroll() {
         if (!dooomScroll.isTriggered() && dooomScroll.checkCollision(player)) {
             dooomScroll.trigger();
+            checkAchievementsAndShowPopup();
             isPaused = true;
             Window.WindowStyle windowStyle = new Window.WindowStyle();
             windowStyle.titleFont = font;
@@ -552,6 +572,7 @@ public class GamePlay implements Screen {
     public void dodgyTakeaway() {
         if (!dodgyTakeaway.isTriggered() && dodgyTakeaway.checkCollision(player)) {
             dodgyTakeaway.trigger();
+            checkAchievementsAndShowPopup();
             inputInvertedActive = true;
             inputInvertedTimer = 20f; // Reset timer to 20 seconds
             player.setInputInverted(true);
@@ -631,6 +652,7 @@ public class GamePlay implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 recommendationLetter.trigger();
+                checkAchievementsAndShowPopup();
                 recommendationLetter.setResponded(true);
                 points.setScoreMultiplied(true);
                 scoreMultipliedLabel.setVisible(true);
@@ -885,6 +907,7 @@ public class GamePlay implements Screen {
         // Key collection
         if (!key.isTriggered() && key.collides(player.getCollision()) && tripWire.isTriggered()) {
             key.trigger();
+            checkAchievementsAndShowPopup();
             hasKey = true;
         }
 
@@ -1040,6 +1063,17 @@ public class GamePlay implements Screen {
                 // Restore player speed (multiply by 2 to undo the 0.5 slow)
                 modifySpeed(2f);
             }
+        }
+    }
+
+    // Checks for newly unlocked achievements and displays a temporary on-screen message
+    private void checkAchievementsAndShowPopup() {
+        achievements.checkForUnlocks();
+        String msg = achievements.popLastUnlockedMessage(); // Assign message if unlocked
+        if (msg != null) {
+            achievementLabel.setText(msg);
+            achievementLabel.setVisible(true);
+            achievementTimer = 6.0; // show achievement notification for 6 seconds
         }
     }
 

@@ -52,6 +52,7 @@ public class GamePlay implements Screen {
     Texture friendTexture;
     Texture longboiTexture;
     Texture phoneTexture;
+    Texture wifiTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -63,6 +64,7 @@ public class GamePlay implements Screen {
     AnnoyingFriendEvent annoyingFriend;
     LongboiCaptureEvent longboiCapture;
     DoomScrollEvent dooomScroll;
+    EduroamEvent eduroam;
 
     // map
     FitViewport viewport;
@@ -158,6 +160,8 @@ public class GamePlay implements Screen {
         longboiTexture = new Texture(Gdx.files.internal("longboi.png"));
         // placeholder texture can be changed later
         phoneTexture = new Texture(Gdx.files.internal("phone.png"));
+        // place holder texture
+        wifiTexture = new Texture(Gdx.files.internal("wifi1.png"));
         System.out.println("Textures loaded successfully");
 
         // Load map
@@ -194,6 +198,8 @@ public class GamePlay implements Screen {
 
         // (placeholder coordinates can be changed later)
         dooomScroll = new DoomScrollEvent("DoomScroll", phoneTexture,250,250, eventCounter);
+
+        eduroam = new EduroamEvent("eduroam", wifiTexture, 500, 300, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -256,7 +262,7 @@ public class GamePlay implements Screen {
         stage.addActor(annoyingFriendLabel);
         stage.addActor(longboiQuestLabel);
         stage.addActor(achievementLabel);
-        
+
         // Set initial visibility
         boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
@@ -295,6 +301,7 @@ public class GamePlay implements Screen {
             alarmClock();
             dodgyTakeaway();
             doomScroll();
+            eduRoam();
             checkExam();
             checkRecommendationLetter();
             checkAnnoyingFriend();
@@ -311,7 +318,7 @@ public class GamePlay implements Screen {
                     achievementTimer = 0;
                     achievementLabel.setVisible(false);
                 }
-            } 
+            }
     draw();
 }
 
@@ -431,6 +438,64 @@ public class GamePlay implements Screen {
                     showLongboiQuestCompleteDialog();
                 }
             }
+        }
+    }
+
+    public void eduRoam() {
+        if (!eduroam.isTriggered() && eduroam.checkCollision(player)) {
+            eduroam.trigger();
+            checkAchievementsAndShowPopup();
+            isPaused = true;
+            Window.WindowStyle windowStyle = new Window.WindowStyle();
+            windowStyle.titleFont = font;
+            windowStyle.titleFontColor = Color.BLACK;
+            // Create white background drawable
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.WHITE);
+            pixmap.fill();
+            TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+            pixmap.dispose();
+            NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+            windowStyle.background = new NinePatchDrawable(ninePatch);
+
+            Window window = new Window("eduroam lost connection", windowStyle);
+            window.setModal(true);
+            window.setMovable(false);
+            window.setResizable(false);
+
+            // Set window size and position (centered using viewport coordinates)
+            float windowWidth = 600;
+            float windowHeight = 300;
+            float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+            float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+            window.setSize(windowWidth, windowHeight);
+            window.setPosition(windowX, windowY);
+            // Adjust padding to prevent title from being cut off
+            window.padTop(40);
+            Table table = new Table();
+            table.center();
+
+            BitmapFont messageFont = new BitmapFont();
+            messageFont.getData().setScale(1.8f);
+            Label messageLabel = new Label("Unfortunately eduroam forgot your login, this made you have to log back in and lose 150 seconds", new Label.LabelStyle(messageFont, Color.BLACK));
+            messageLabel.setWrap(true);
+            table.add(messageLabel).width(windowWidth - 120);
+            table.row();
+
+            TextButton okButton = new TextButton("OK", skin);
+            okButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    window.remove();
+                    stage.getRoot().removeActor(window);
+                    points.subtractPoints(9000);
+                    isPaused = false;
+                    updateTimer(150);
+                }
+            });
+            table.add(okButton).center().padRight(80);
+            window.add(table);
+            stage.addActor(window);
         }
     }
     public void doomScroll() {
@@ -961,6 +1026,10 @@ public class GamePlay implements Screen {
             dooomScroll.draw(spriteBatch);
         }
 
+        if (!eduroam.isTriggered()) {
+            eduroam.draw(spriteBatch);
+        }
+
         //draw recommendation letter (teacher) - always visible
         recommendationLetter.draw(spriteBatch);
 
@@ -1108,6 +1177,7 @@ public class GamePlay implements Screen {
         longboiCapture.dispose();
         longboiTexture.dispose();
         phoneTexture.dispose();
+        wifiTexture.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

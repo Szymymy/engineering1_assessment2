@@ -19,11 +19,11 @@ In addition we have also provided the game files for you to play.
 
 
 ## updated project documents by team 6
-- [new requirements document](https://docs.google.com/document/d/1M9yuUG_KUc_mqGkAkrzoFJHMOgUomY04MMbUulow57U/edit?tab=t.0)
-- [new Architecture document](https://docs.google.com/document/d/1-MtzgJgA7b15F1p1XPPaaiK7pFcKPXci256woZC-xLw/edit?pli=1&tab=t.0)
-- [new Method selection and planning document](https://docs.google.com/document/d/1MZCkS7PhAO-snd9vU-wM0Hwimc-s3bHzZntSn9ziaBs/edit?tab=t.0)
-- [new Risk assessment and mitigation document](https://docs.google.com/document/d/1WgyR4WtIbvC3NdEMEVUKwR2XFLAHHzYzvjHXm5jX2VY/edit?tab=t.0)
-- [new Implementation document](https://docs.google.com/document/d/14OnY8ed3lzr4Nm2iBjnIIyKYcgpf6qTfb9mJEUcsDsk/edit?tab=t.0)
+- [Change report Document](https://docs.google.com/document/d/1c22gnWIYHvwpSHianpsmM7BoW3IHVpx7ZGGihe3KV54/edit?tab=t.0)
+- [Implementation Document](https://docs.google.com/document/d/18nzHqC--moafnhy3LhxpXwR0W6zuLDYM-xaXcvr6niA/edit?tab=t.0)
+- [Testing Document](https://docs.google.com/document/d/1QDP2GJ24GCFGsrmE5xK8RqbZl_yNdQ9cTyU55ui0BOY/edit?tab=t.0)
+- [User Evaluation Document](https://docs.google.com/document/d/1l754glt3XRBx2aXs58wN64kFvF39EBvV5Yxe7zrioaU/edit?tab=t.0)
+- [Continuous Integration Document](https://docs.google.com/document/d/1p8BscnD0Qf2L_4-PW4tOVYv2rZh6ju1icTICx9jL9HY/edit?tab=t.0)
 ## Executable code 
 - [Download Team_5_Game.jar](https://github.com/thomas-nolan/Engineering-1.github.io/raw/main/team-5/Team_5_Game.jar)
 
@@ -164,5 +164,18 @@ The second implementation improved the structure by:
 
 ---
 
-### Software Testing place holder done by team 6
+### Final updated Architecture – Added the rest of the events and additional classes
+
+The final implementation of the structure by:
+- adding the rest of the events that were added
+- adding the leaderboard and achievements
+
+<div align="center">
+
+  <img width="3405" height="508" alt="final uml 2" src="https://github.com/user-attachments/assets/ce639b89-e707-4f43-ae89-11d0e0e7a9b5" />
+
+</div>
+  
+
+### Software Testing placeholder done by team 6
 

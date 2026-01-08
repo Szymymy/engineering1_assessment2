@@ -136,7 +136,7 @@ public class EndGameScreen implements Screen{
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 String name = nameInputField.getText();
-                if (!(name.length() > 64 || name.length() == 0)) {
+                if (!(name.length() > 64 || name.length() == 0 || name.contains("&"))) {
                     leaderboard = new Leaderboard();
                     leaderboard.updateLeaderboard(score, name);
                     nameLeaderboardButton.setDisabled(true);

@@ -28,6 +28,7 @@ public class LeaderboardScreen implements Screen {
     private BitmapFont buttonsFont;
     private Texture background;
     private Texture exitButtonTexture, hoverExitButtonTexture;
+    private Skin skin;
 
     public LeaderboardScreen(final Main game) {
         this.main = game;
@@ -44,6 +45,7 @@ public class LeaderboardScreen implements Screen {
     private void generateAssets() {
         exitButtonTexture =  new Texture(Gdx.files.internal("ExitButton.png"));
         hoverExitButtonTexture =  new Texture(Gdx.files.internal("HoverExitButton.png"));
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
     }
 
@@ -87,11 +89,23 @@ public class LeaderboardScreen implements Screen {
 
         drawLeaderboard(table);
 
-        TextButton exitButton = new TextButton("", exitButtonStyle);
-        exitButton.setStyle(exitButtonStyle);
+        TextButton exitButton = new TextButton("Exit", skin);
         exitButton.setBounds(0, 0, 400, 120);
         exitButton.addListener(makeExitButtonListener());
         stage.addActor(exitButton);
+
+        TextButton resetLeaderboard = new TextButton("Reset leaderboard", skin);
+        resetLeaderboard.setBounds(Gdx.graphics.getWidth() - 400, 0, 400, 120);
+        resetLeaderboard.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Leaderboard leaderboard = new Leaderboard();
+                leaderboard.clearLeaderboard();
+                table.clear();
+                drawLeaderboard(table);
+            }
+        });
+        stage.addActor(resetLeaderboard);
     }
 
     private ClickListener makeExitButtonListener() {

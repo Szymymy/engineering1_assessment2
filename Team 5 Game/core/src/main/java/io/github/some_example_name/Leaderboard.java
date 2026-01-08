@@ -25,7 +25,7 @@ public class Leaderboard {
      * loads any data in a file.
      */
     public Leaderboard() {
-        leaderboard = new String[] {"NUL&0","NUL&0","NUL&0","NUL&0","NUL&0"};
+        leaderboard = new String[] {"null&0","null&0","null&0","null&0","null&0"};
         loadLeaderboard();
     }
 
@@ -124,8 +124,19 @@ public class Leaderboard {
     public void clearLeaderboard() {
         int i = 0;
         while (i < leaderboard.length) {
-            leaderboard[i] = "NUL0";
+            leaderboard[i] = "null&0";
             i++;
+        }
+        try {
+            FileWriter scoreWriter = new FileWriter("data.txt");
+            for (String scores: leaderboard) {
+                scoreWriter.write(scores+"\n");
+            }
+            scoreWriter.close();
+        } 
+        catch(IOException e) {
+            System.out.println("An error occured.");
+            e.printStackTrace();
         }
     }
 }

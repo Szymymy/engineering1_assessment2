@@ -1,5 +1,5 @@
-YYY&20000
-Szymy_2.0&12910
-Sigma&12603
-Name invalid!&11282
-AAA&1000
+null&0
+null&0
+null&0
+null&0
+null&0

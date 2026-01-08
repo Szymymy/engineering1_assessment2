@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,9 +27,13 @@ public class EndGameScreen implements Screen{
     private Label messageLabel;
     private Label scoreLabel;
     private TextButton menuButton;
+    private TextButton leaderboardButton;
+    private TextButton nameLeaderboardButton;
     private Main game;
     private int score;
     private Texture backgroundTexture;
+    private TextField nameInputField;
+    private Leaderboard leaderboard;
 
 
     /**
@@ -62,6 +67,12 @@ public class EndGameScreen implements Screen{
         background.setPosition(0, 0);
         stage.addActor(background);
 
+        // Leaderboard nickname input box only shows if player wins  
+        nameInputField = new TextField("", skin);
+        nameInputField.setMessageText("AAA");
+        nameInputField.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 150);
+        nameInputField.setSize(300,50);
+
 
         //label message and colour which depends on the boolean escaped
         Label.LabelStyle style =  escaped ? new Label.LabelStyle(font, Color.GREEN) : new Label.LabelStyle(font, Color.RED);
@@ -69,8 +80,8 @@ public class EndGameScreen implements Screen{
         messageLabel = new Label(message, style);
         messageLabel.setFontScale(2f);
         messageLabel.setPosition(
-            Gdx.graphics.getWidth() / 2f - messageLabel.getWidth() / 2f,
-            Gdx.graphics.getHeight() - 100
+            Gdx.graphics.getWidth() / 2f - messageLabel.getWidth(),
+            Gdx.graphics.getHeight() - 250
         );
         stage.addActor(messageLabel);
 
@@ -83,7 +94,7 @@ public class EndGameScreen implements Screen{
             );
         stage.addActor(scoreLabel);
 
-        //button for main menu
+        // Button for menu screen
         menuButton = new TextButton("Back to main menu", skin);
         menuButton.setSize(300, 80);
         menuButton.setPosition(
@@ -92,13 +103,57 @@ public class EndGameScreen implements Screen{
         );
         menuButton.addListener(new ClickListener(){
             @Override
-            //ignore the argument - used for specific click / place clicked
             public void clicked(InputEvent event, float x, float y) {
             	dispose();
                 game.setScreen(new MainMenu(game));
             }
         });
         stage.addActor(menuButton);
+
+        // Button for leaderboard screen
+        leaderboardButton = new TextButton("To Leaderboard", skin);
+        leaderboardButton.setSize(300, 80);
+        leaderboardButton.setPosition(
+            Gdx.graphics.getWidth() / 2f - leaderboardButton.getWidth() /2f,
+            Gdx.graphics.getHeight() - 600
+        );
+        leaderboardButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dispose();
+                game.setScreen(new LeaderboardScreen(game));
+            }
+        });
+        stage.addActor(leaderboardButton);
+
+        nameLeaderboardButton = new TextButton("Add", skin);
+        nameLeaderboardButton.setSize(100, 80);
+        nameLeaderboardButton.setPosition(
+            nameInputField.getX() + nameInputField.getWidth() + 25, 
+            nameInputField.getY() + nameInputField.getHeight()
+        );
+        nameLeaderboardButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String name = nameInputField.getText();
+                if (!(name.length() > 64 || name.length() == 0)) {
+                    leaderboard = new Leaderboard();
+                    leaderboard.updateLeaderboard(score, name);
+                    nameLeaderboardButton.setDisabled(true);
+                    nameInputField.clear();
+                } else {
+                    nameInputField.setMessageText("Name invalid!");
+                }
+                
+            }
+        });
+
+
+        // Adding score to leaderboard logic
+        if (escaped) {
+            stage.addActor(nameInputField);
+            stage.addActor(nameLeaderboardButton);
+        }
 
     }
 

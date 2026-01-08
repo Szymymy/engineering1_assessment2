@@ -25,7 +25,7 @@ public class Leaderboard {
      * loads any data in a file.
      */
     public Leaderboard() {
-        leaderboard = new String[] {"NUL0","NUL0","NUL0","NUL0","NUL0"};
+        leaderboard = new String[] {"NUL&0","NUL&0","NUL&0","NUL&0","NUL&0"};
         loadLeaderboard();
     }
 
@@ -77,9 +77,11 @@ public class Leaderboard {
             return false;
         }
         String[] newLeaderboard = loadLeaderboard();
-        for (String scores: newLeaderboard) {    
-            String score = scores.substring(3);
-            scoreMap.put(scores.substring(0, 3), Integer.parseInt(score));
+        int delimInt = 0;
+        for (String scores: newLeaderboard) {
+            delimInt = scores.indexOf('&');
+            String score = scores.substring(delimInt + 1);
+            scoreMap.put(scores.substring(0, delimInt), Integer.parseInt(score));
         }
         Entry<String, Integer> minEntry = scoreMap.entrySet().stream().min(Map.Entry.comparingByValue()).orElse(null);
         if (newScore > minEntry.getValue()) {
@@ -89,7 +91,7 @@ public class Leaderboard {
         int i = 0;
         while (!scoreMap.isEmpty()) {
             Entry<String, Integer> maxEntry = scoreMap.entrySet().stream().max(Map.Entry.comparingByValue()).orElse(null);
-            newLeaderboard[i] = (maxEntry.getKey()+maxEntry.getValue());
+            newLeaderboard[i] = (maxEntry.getKey()+'&'+maxEntry.getValue());
             scoreMap.remove(maxEntry.getKey());
             i++;
         }

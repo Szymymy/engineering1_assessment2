@@ -62,11 +62,11 @@ public class LeaderboardScreen implements Screen {
         LabelStyle labelStyle = new LabelStyle();
         labelStyle.font = buttonsFont;
         Label title = new Label("LEADERBOARD", labelStyle);
-        Label score1 = new Label(scores[0], labelStyle);
-        Label score2 = new Label(scores[1], labelStyle);
-        Label score3 = new Label(scores[2], labelStyle);
-        Label score4 = new Label(scores[3], labelStyle);
-        Label score5 = new Label(scores[4], labelStyle);
+        Label score1 = new Label(scoreFormat(scores[0]), labelStyle);
+        Label score2 = new Label(scoreFormat(scores[1]), labelStyle);
+        Label score3 = new Label(scoreFormat(scores[2]), labelStyle);
+        Label score4 = new Label(scoreFormat(scores[3]), labelStyle);
+        Label score5 = new Label(scoreFormat(scores[4]), labelStyle);
         table.add(title).pad(10); table.row();
         table.add(score1).pad(10);; table.row();
         table.add(score2).pad(10);; table.row();
@@ -114,13 +114,7 @@ public class LeaderboardScreen implements Screen {
 
     @Override
     public void show() {
-        
-        
-        
         Gdx.input.setInputProcessor(stage);
-
-
-
     }
 
     @Override
@@ -135,4 +129,13 @@ public class LeaderboardScreen implements Screen {
     @Override
     public void resume() {}
 
+
+    private String scoreFormat(String score) {
+        String newScore;
+        int delimIndex = score.indexOf('&');
+        newScore = score.substring(0, delimIndex);
+        newScore = newScore + " ";
+        newScore = newScore + score.substring(delimIndex + 1);
+        return newScore;
+    }
 }

@@ -122,7 +122,6 @@ public class Player {
                 position.y = newYPosition;
             }
         }
-        System.out.println(position);
         sprite.setPosition(position.x, position.y);
         playerCollision.setPosition(position.x, position.y);
     }

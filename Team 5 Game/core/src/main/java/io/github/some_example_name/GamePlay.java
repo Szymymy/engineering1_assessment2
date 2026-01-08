@@ -125,6 +125,8 @@ public class GamePlay implements Screen {
     // Event Counter
     EventCounter eventCounter = new EventCounter();
 
+    // Leaderboard
+    Leaderboard leaderboard = new Leaderboard();
     // Handles achievements
     Achievements achievements = new Achievements(eventCounter, points);
 

@@ -3,8 +3,6 @@ package io.github.some_example_name;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.events.EventException;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -20,12 +18,20 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /* This class handles the main game screen.
  * This class creates the map, player, dean
@@ -40,11 +46,25 @@ public class GamePlay implements Screen {
     Texture keyTexture;
     Texture deanTexture;
     Texture deanAreaDebug;
+    Texture alarmClockTexture;
+    Texture dodgyTakeawayTexture;
+    Texture teacherTexture;
+    Texture friendTexture;
+    Texture longboiTexture;
+    Texture phoneTexture;
+    Texture wifiTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
     Player player;
     SpeedBoostEvent speedBoost;
+    AlarmClockEvent alarmClock;
+    DodgyTakeawayEvent dodgyTakeaway;
+    RecommendationLetterEvent recommendationLetter;
+    AnnoyingFriendEvent annoyingFriend;
+    LongboiCaptureEvent longboiCapture;
+    DoomScrollEvent dooomScroll;
+    EduroamEvent eduroam;
 
     // map
     FitViewport viewport;
@@ -59,12 +79,21 @@ public class GamePlay implements Screen {
     // UI
     boolean isPaused;
     boolean speedBoostActive = false;
+    boolean inputInvertedActive = false;
+    boolean examActive = false;
+    boolean recommendationLetterActive = false;
+    boolean annoyingFriendActive = false;
+    boolean longboiQuestComplete = false;
     Stage stage;
     Skin skin;
     Label label;
     Label boostLabel;
     Label pausedLabel;
     Label eventCountLabel;
+    Label scoreMultipliedLabel;
+    Label annoyingFriendLabel;
+    Label longboiQuestLabel;
+    Label achievementLabel;
 
     // Label styles (red, yellow and green)
     Label.LabelStyle redStyle;
@@ -74,12 +103,16 @@ public class GamePlay implements Screen {
     // Timer
     double timer = 300.0;
     double boostTimer = 30f; // For speed boost
+    double inputInvertedTimer = 20f; // For dodgy takeaway input inversion
+    double annoyingFriendTimer = 15f; // For annoying friend effect
+    double achievementTimer = 0; // For achievement pop up
 
     // Doors
     private List<Door> doors = new ArrayList<>();
     private TripwireEvent tripWire;
     private KeyEvent key;
     private boolean hasKey = false;
+    private ExamEvent exam;
 
     // Dean
     private Dean dean;
@@ -94,6 +127,8 @@ public class GamePlay implements Screen {
 
     // Leaderboard
     Leaderboard leaderboard = new Leaderboard();
+    // Handles achievements
+    Achievements achievements = new Achievements(eventCounter, points);
 
     // constructor
     public GamePlay(final Main game) {
@@ -118,7 +153,17 @@ public class GamePlay implements Screen {
         doorTexture = new Texture(Gdx.files.internal("door1.png"));
         keyTexture = new Texture(Gdx.files.internal("keycard1.png"));
         deanTexture = new Texture(Gdx.files.internal("dean.png"));
-
+        // TODO: Replace with actual alarm clock texture when available
+        alarmClockTexture = new Texture(Gdx.files.internal("alarm.png")); // Placeholder texture
+        // TODO: Replace with actual dodgy takeaway texture when available
+        dodgyTakeawayTexture = new Texture(Gdx.files.internal("dodgy_takeaway.png")); // Placeholder texture
+        teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
+        friendTexture = new Texture(Gdx.files.internal("friend.png"));
+        longboiTexture = new Texture(Gdx.files.internal("longboi.png"));
+        // placeholder texture can be changed later
+        phoneTexture = new Texture(Gdx.files.internal("phone.png"));
+        // place holder texture
+        wifiTexture = new Texture(Gdx.files.internal("wifi1.png"));
         System.out.println("Textures loaded successfully");
 
         // Load map
@@ -138,6 +183,26 @@ public class GamePlay implements Screen {
         // speedboost
         speedBoost = new SpeedBoostEvent("SpeedBoost", speedBoostTexture, 680, 490, eventCounter);
 
+        // alarm clock (placeholder coordinates - TODO: set actual position)
+        alarmClock = new AlarmClockEvent("AlarmClock", alarmClockTexture, 950, 650, eventCounter);
+
+        // dodgy takeaway (TODO: placeholder coordinates - set actual position)
+        dodgyTakeaway = new DodgyTakeawayEvent("DodgyTakeaway", dodgyTakeawayTexture, 420, 820, eventCounter);
+
+        // recommendation letter (teacher) - TODO: placeholder coordinates
+        recommendationLetter = new RecommendationLetterEvent("RecommendationLetter", teacherTexture, 1070, 200, eventCounter);
+
+        // annoying friend - TODO: placeholder coordinates
+        annoyingFriend = new AnnoyingFriendEvent("AnnoyingFriend", friendTexture, 800, 300, eventCounter);
+
+        // longboi capture (hidden quest - collect 3 longbois)
+        longboiCapture = new LongboiCaptureEvent("LongboiCapture", longboiTexture, eventCounter);
+
+        // (placeholder coordinates can be changed later)
+        dooomScroll = new DoomScrollEvent("DoomScroll", phoneTexture,250,250, eventCounter);
+
+        eduroam = new EduroamEvent("eduroam", wifiTexture, 500, 300, eventCounter);
+
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
 
@@ -154,10 +219,15 @@ public class GamePlay implements Screen {
         Rectangle tripWireZone = new Rectangle(384, 480, 32, 64);
         tripWire = new TripwireEvent("tripwire", tripWireZone, door, eventCounter);
 
+        // exam
+        Rectangle examZone = new Rectangle(900, 800, 50, 50);
+        exam = new ExamEvent("Exam", examZone, eventCounter);
+
         finishZone = new Rectangle(0, 864, 32, 128);
 
         // Set up UI (only game UI, no menu)
-        stage = new Stage(new ScreenViewport());
+        // Use FitViewport to match the game viewport for consistent coordinates
+        stage = new Stage(new FitViewport(1600, 1120));
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         font = new BitmapFont();
@@ -170,31 +240,41 @@ public class GamePlay implements Screen {
         boostLabel = new Label(String.format("%.1f", boostTimer), greenStyle);
         eventCountLabel = new Label("POS: 0 / HID: 0 / NEG: 0", greenStyle);
         pausedLabel = new Label("PAUSED", greenStyle);
+        scoreMultipliedLabel = new Label("Score is permanently multiplied!", greenStyle);
+        annoyingFriendLabel = new Label("Annoying friend following you!", redStyle);
+        longboiQuestLabel = new Label("Longbois: 0/3", yellowStyle);
+        achievementLabel = new Label("", yellowStyle);
 
-        label.setPosition(900, 1000); // At the top of the screen
-        boostLabel.setPosition(500, 1000);
-        eventCountLabel.setPosition(1200, 1000);
-        pausedLabel.setPosition(900, 500); // Displayed at the centre of the screen
+        // Position labels within the 1600x1120 coordinate system
+        label.setPosition(700, 1050); // Timer at the top center
+        boostLabel.setPosition(300, 1050); // Boost timer on the left
+        eventCountLabel.setPosition(1000, 1050); // Event counter on the right
+        pausedLabel.setPosition(700, 560); // Paused label at center (1120/2 = 560)
+        scoreMultipliedLabel.setPosition(50, 1050); // Left of timer, same height
+        annoyingFriendLabel.setPosition(50, 1000); // Below score multiplied label
+        longboiQuestLabel.setPosition(50, 950); // Below annoying friend label
+        achievementLabel.setPosition(50,900); // Achievements appear in the top left of the screen
 
-        stage.addActor(pausedLabel);
-        stage.addActor(label);
-        boostLabel.setVisible(false);
-        pausedLabel.setVisible(false);
-
-        mapRenderer = new OrthogonalTiledMapRenderer(map);
-
-        // Set up UI (only game UI, no menu)
-        stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-        font = new BitmapFont();
-        font.getData().setScale(2.5f);
-        label.setPosition(900, 1000); // At the top of the screen
-        pausedLabel.setPosition(900, 500); // Displayed at the centre of the screen
-        stage.addActor(pausedLabel);
+        // Add all labels to stage
         stage.addActor(label);
         stage.addActor(boostLabel);
         stage.addActor(eventCountLabel);
+        stage.addActor(pausedLabel);
+        stage.addActor(scoreMultipliedLabel);
+        stage.addActor(annoyingFriendLabel);
+        stage.addActor(longboiQuestLabel);
+        stage.addActor(achievementLabel);
+
+        // Set initial visibility
+        boostLabel.setVisible(false);
         pausedLabel.setVisible(false);
+        scoreMultipliedLabel.setVisible(false);
+        annoyingFriendLabel.setVisible(false);
+        longboiQuestLabel.setVisible(false);
+        achievementLabel.setVisible(false);
+
+        // Set input processor for UI interactions (needed for exam dialog)
+        Gdx.input.setInputProcessor(stage);
 
         System.out.println("GamePlay screen loaded successfully");
     }
@@ -214,24 +294,661 @@ public class GamePlay implements Screen {
 
         // No menu check - just show the game directly
         togglePause();
-        if (!isPaused) {
+        if (!isPaused && !examActive && !recommendationLetterActive && !annoyingFriendActive && !longboiQuestComplete) {
             input();
             logic();
             updateTimer(delta);
             updateEventCount();
             speedBoost();
+            alarmClock();
+            dodgyTakeaway();
+            doomScroll();
+            eduRoam();
+            checkExam();
+            checkRecommendationLetter();
+            checkAnnoyingFriend();
+            checkLongboiCapture();
             dean.update();
+            // Update annoying friend position (follows player when active)
+            if (annoyingFriend.isFollowing()) {
+                annoyingFriend.update(player, delta);
+            }
         }
-        draw();
-    }
+            if (achievementTimer > 0) { // Decrease achievement popup timer and hide message when time runs out
+                achievementTimer -= delta;
+                if (achievementTimer <= 0) {
+                    achievementTimer = 0;
+                    achievementLabel.setVisible(false);
+                }
+            }
+    draw();
+}
 
     public void speedBoost() {
         if (!speedBoost.isTriggered() && speedBoost.checkCollision(player)) {
             speedBoost.trigger();
+            checkAchievementsAndShowPopup();
             boostLabel.setVisible(true);
             speedBoostActive = true;
             modifySpeed(2); // Doubles player speed
         }
+    }
+
+    /* Handles alarm clock event collision and triggering
+     * When the player collects the alarm clock, it adds 30 seconds to the timer
+     */
+    public void alarmClock() {
+        if (!alarmClock.isTriggered() && alarmClock.checkCollision(player)) {
+            alarmClock.trigger();
+            checkAchievementsAndShowPopup(); // Checks whether any achievement conditions have been met after an event occurs
+            timer += 30.0; // Add 30 seconds to the timer
+        }
+    }
+
+    /* Handles annoying friend event collision and triggering
+     * When the player collides with the annoying friend, they follow and slow them down for 15 seconds
+     */
+    public void checkAnnoyingFriend() {
+        if (!annoyingFriend.isTriggered() && annoyingFriend.checkCollision(player)) {
+            annoyingFriend.trigger();
+            checkAchievementsAndShowPopup();
+            annoyingFriendActive = true;
+            annoyingFriendTimer = 15f; // Reset timer to 15 seconds
+            annoyingFriendLabel.setVisible(true);
+            // Slow down the player by half
+            modifySpeed(0.5f);
+            showAnnoyingFriendDialog();
+        }
+    }
+
+    /* Shows the annoying friend dialog popup
+     * Displays a message that the friend will be annoying for 15 seconds
+     */
+    private void showAnnoyingFriendDialog() {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+
+        Window friendWindow = new Window("Annoying Friend", windowStyle);
+        friendWindow.setModal(true);
+        friendWindow.setMovable(false);
+        friendWindow.setResizable(false);
+
+        // Set window size and position (centered using viewport coordinates)
+        float windowWidth = 600;
+        float windowHeight = 250;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        friendWindow.setSize(windowWidth, windowHeight);
+        friendWindow.setPosition(windowX, windowY);
+
+        // Adjust padding to prevent title from being cut off
+        friendWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout - center everything
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+
+        // Message label
+        BitmapFont messageFont = new BitmapFont();
+        messageFont.getData().setScale(1.8f);
+        Label messageLabel = new Label("I will be annoying you for 15 seconds!", new Label.LabelStyle(messageFont, Color.BLACK));
+        table.add(messageLabel).padBottom(20).padTop(20).padRight(80);
+        table.row();
+
+        // OK button
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                friendWindow.remove();
+                stage.getRoot().removeActor(friendWindow);
+                annoyingFriendActive = false;
+            }
+        });
+        table.add(okButton).center().padRight(80);
+        friendWindow.add(table);
+
+        stage.addActor(friendWindow);
+    }
+
+    /* Handles longboi capture hidden quest
+     * When the player collects a longboi, updates count
+     * When all 3 are collected, shows completion dialog
+     */
+    public void checkLongboiCapture() {
+        if (!longboiCapture.isTriggered()) {
+            int collectedIndex = longboiCapture.checkCollision(player);
+            if (collectedIndex >= 0) {
+                boolean questComplete = longboiCapture.collectLongboi(collectedIndex);
+                checkAchievementsAndShowPopup();
+                // Show/update the counter label after first collection
+                longboiQuestLabel.setVisible(true);
+                longboiQuestLabel.setText("Longbois: " + longboiCapture.getCollectedCount() + "/3");
+
+                if (questComplete) {
+                    showLongboiQuestCompleteDialog();
+                }
+            }
+        }
+    }
+
+    public void eduRoam() {
+        if (!eduroam.isTriggered() && eduroam.checkCollision(player)) {
+            eduroam.trigger();
+            checkAchievementsAndShowPopup();
+            isPaused = true;
+            Window.WindowStyle windowStyle = new Window.WindowStyle();
+            windowStyle.titleFont = font;
+            windowStyle.titleFontColor = Color.BLACK;
+            // Create white background drawable
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.WHITE);
+            pixmap.fill();
+            TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+            pixmap.dispose();
+            NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+            windowStyle.background = new NinePatchDrawable(ninePatch);
+
+            Window window = new Window("eduroam lost connection", windowStyle);
+            window.setModal(true);
+            window.setMovable(false);
+            window.setResizable(false);
+
+            // Set window size and position (centered using viewport coordinates)
+            float windowWidth = 600;
+            float windowHeight = 300;
+            float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+            float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+            window.setSize(windowWidth, windowHeight);
+            window.setPosition(windowX, windowY);
+            // Adjust padding to prevent title from being cut off
+            window.padTop(40);
+            Table table = new Table();
+            table.center();
+
+            BitmapFont messageFont = new BitmapFont();
+            messageFont.getData().setScale(1.8f);
+            Label messageLabel = new Label("Unfortunately eduroam forgot your login, this made you have to log back in and lose 150 seconds", new Label.LabelStyle(messageFont, Color.BLACK));
+            messageLabel.setWrap(true);
+            table.add(messageLabel).width(windowWidth - 120);
+            table.row();
+
+            TextButton okButton = new TextButton("OK", skin);
+            okButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    window.remove();
+                    stage.getRoot().removeActor(window);
+                    points.subtractPoints(9000);
+                    isPaused = false;
+                    updateTimer(150);
+                }
+            });
+            table.add(okButton).center().padRight(80);
+            window.add(table);
+            stage.addActor(window);
+        }
+    }
+    public void doomScroll() {
+        if (!dooomScroll.isTriggered() && dooomScroll.checkCollision(player)) {
+            dooomScroll.trigger();
+            checkAchievementsAndShowPopup();
+            isPaused = true;
+            Window.WindowStyle windowStyle = new Window.WindowStyle();
+            windowStyle.titleFont = font;
+            windowStyle.titleFontColor = Color.BLACK;
+            // Create white background drawable
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.WHITE);
+            pixmap.fill();
+            TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+            pixmap.dispose();
+            NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+            windowStyle.background = new NinePatchDrawable(ninePatch);
+
+            Window doomWindow = new Window("Doom Scrolled", windowStyle);
+            doomWindow.setModal(true);
+            doomWindow.setMovable(false);
+            doomWindow.setResizable(false);
+
+            // Set window size and position (centered using viewport coordinates)
+            float windowWidth = 600;
+            float windowHeight = 300;
+            float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+            float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+            doomWindow.setSize(windowWidth, windowHeight);
+            doomWindow.setPosition(windowX, windowY);
+            // Adjust padding to prevent title from being cut off
+            doomWindow.padTop(40);
+            Table table = new Table();
+            table.center();
+
+            BitmapFont messageFont = new BitmapFont();
+            messageFont.getData().setScale(1.8f);
+            Label messageLabel = new Label("You decided to doomscroll instead of revising, as a result you lose 3000 points", new Label.LabelStyle(messageFont, Color.BLACK));
+            messageLabel.setWrap(true);
+            table.add(messageLabel).width(windowWidth - 120);
+            table.row();
+
+            TextButton okButton = new TextButton("OK", skin);
+            okButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    doomWindow.remove();
+                    stage.getRoot().removeActor(doomWindow);
+                    points.subtractPoints(9000);
+                    isPaused = false;
+                }
+            });
+            table.add(okButton).center().padRight(80);
+            doomWindow.add(table);
+
+            stage.addActor(doomWindow);
+        }
+    }
+    /* Shows the longboi quest completion dialog
+     * Displays congratulations message and gives bonus points
+     */
+    private void showLongboiQuestCompleteDialog() {
+        longboiQuestComplete = true;
+        isPaused = true;
+
+        // Add bonus points for completing the quest
+        points.addPoints(150);
+
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+
+        Window questWindow = new Window("Hidden Quest Complete!", windowStyle);
+        questWindow.setModal(true);
+        questWindow.setMovable(false);
+        questWindow.setResizable(false);
+
+        // Set window size and position (centered)
+        float windowWidth = 700;
+        float windowHeight = 300;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        questWindow.setSize(windowWidth, windowHeight);
+        questWindow.setPosition(windowX, windowY);
+        questWindow.padTop(40);
+
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+
+        // Message label
+        BitmapFont messageFont = new BitmapFont();
+        messageFont.getData().setScale(1.8f);
+        Label messageLabel = new Label("Hidden quest completed, you got extra points!", new Label.LabelStyle(messageFont, Color.BLACK));
+        table.add(messageLabel).padBottom(30).padTop(20).padRight(80);
+        table.row();
+
+        // Points message
+        BitmapFont pointsFont = new BitmapFont();
+        pointsFont.getData().setScale(1.5f);
+        Label pointsLabel = new Label("+150 points", new Label.LabelStyle(pointsFont, Color.GREEN));
+        table.add(pointsLabel).padBottom(20).padRight(80);
+        table.row();
+
+        // OK button
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                questWindow.remove();
+                stage.getRoot().removeActor(questWindow);
+                longboiQuestComplete = false;
+                isPaused = false;
+                // Update label to show completion
+                longboiQuestLabel.setText("Longbois: 3/3 - Complete!");
+                longboiQuestLabel.setStyle(greenStyle);
+            }
+        });
+        table.add(okButton).center().padRight(80);
+        questWindow.add(table);
+
+        stage.addActor(questWindow);
+    }
+
+    /* Handles dodgy takeaway event collision and triggering
+     * When the player collects the dodgy takeaway, it inverts input for 20 seconds
+     */
+    public void dodgyTakeaway() {
+        if (!dodgyTakeaway.isTriggered() && dodgyTakeaway.checkCollision(player)) {
+            dodgyTakeaway.trigger();
+            checkAchievementsAndShowPopup();
+            inputInvertedActive = true;
+            inputInvertedTimer = 20f; // Reset timer to 20 seconds
+            player.setInputInverted(true);
+        }
+    }
+
+    /* Handles exam event collision and triggering
+     * When the player enters the exam zone, shows the exam popup
+     */
+    public void checkExam() {
+        if (!exam.isTriggered() && exam.checkTrigger(player.getCollision())) {
+            examActive = true;
+            isPaused = true; // Pause game during exam
+            showExamDialog();
+        }
+    }
+
+    /* Handles recommendation letter event collision and triggering
+     * When the player collides with the teacher, shows a popup asking for reference
+     */
+    public void checkRecommendationLetter() {
+        if (!recommendationLetter.hasResponded() && recommendationLetter.checkCollision(player)) {
+            recommendationLetterActive = true;
+            isPaused = true;
+            showRecommendationLetterDialog();
+        }
+    }
+
+    /* Shows the recommendation letter dialog popup
+     * Asks the player if they want to get a reference
+     */
+    private void showRecommendationLetterDialog() {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        TextureRegion textureRegion = new TextureRegion(new com.badlogic.gdx.graphics.Texture(pixmap));
+        pixmap.dispose();
+        NinePatch ninePatch = new NinePatch(textureRegion, 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(ninePatch);
+
+        Window recommendationWindow = new Window("Recommendation Letter", windowStyle);
+        recommendationWindow.setModal(true);
+        recommendationWindow.setMovable(false);
+        recommendationWindow.setResizable(false);
+
+        // Set window size and position (centered using viewport coordinates)
+        float windowWidth = 600;
+        float windowHeight = 300;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        recommendationWindow.setSize(windowWidth, windowHeight);
+        recommendationWindow.setPosition(windowX, windowY);
+
+        // Adjust padding to prevent title from being cut off
+        recommendationWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout - center everything
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center(); // Center the table content
+
+        // Question label
+        BitmapFont questionFont = new BitmapFont();
+        questionFont.getData().setScale(2f);
+        Label questionLabel = new Label("Do you want to get my reference?", new Label.LabelStyle(questionFont, Color.BLACK));
+        table.add(questionLabel).padBottom(30).padTop(20).padRight(80);
+        table.row();
+
+        // Yes button
+        TextButton yesButton = new TextButton("Yes", skin);
+        yesButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                recommendationLetter.trigger();
+                checkAchievementsAndShowPopup();
+                recommendationLetter.setResponded(true);
+                points.setScoreMultiplied(true);
+                scoreMultipliedLabel.setVisible(true);
+                recommendationWindow.remove();
+                stage.getRoot().removeActor(recommendationWindow);
+                recommendationLetterActive = false;
+                isPaused = false;
+            }
+        });
+
+        // No button
+        TextButton noButton = new TextButton("No", skin);
+        noButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                recommendationLetter.setResponded(true);
+                recommendationWindow.remove();
+                stage.getRoot().removeActor(recommendationWindow);
+                recommendationLetterActive = false;
+                isPaused = false;
+            }
+        });
+
+        // Create a horizontal table for buttons and center it
+        Table buttonRow = new Table();
+        buttonRow.add(yesButton).padRight(30);
+        buttonRow.add(noButton).padRight(80);
+        table.add(buttonRow).center();
+        recommendationWindow.add(table);
+
+        stage.addActor(recommendationWindow);
+    }
+
+    /* Shows the exam dialog popup with questions
+     * Displays one question at a time with 4 answer options
+     */
+    private void showExamDialog() {
+        List<Question> questions = exam.getQuestions();
+        final int[] currentQuestionIndex = {0};
+        final int[] correctAnswers = {0};
+
+        showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
+    }
+
+    /* Displays a single question dialog
+     * @param questions - List of all questions
+     * @param currentQuestionIndex - Array with current question index (mutable)
+     * @param correctAnswers - Array with count of correct answers (mutable)
+     */
+    private void showQuestionDialog(List<Question> questions, final int[] currentQuestionIndex, final int[] correctAnswers) {
+        if (currentQuestionIndex[0] >= questions.size()) {
+            // All questions answered, calculate score
+            finishExam(correctAnswers[0]);
+            return;
+        }
+
+        Question question = questions.get(currentQuestionIndex[0]);
+        String[] options = question.getOptions();
+
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture whiteTexture = new Texture(pixmap);
+        pixmap.dispose();
+        NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(whitePatch);
+
+        Window examWindow = new Window("Exam Question " + (currentQuestionIndex[0] + 1) + "/5", windowStyle);
+        examWindow.setModal(true);
+        examWindow.setMovable(false);
+
+        // Set window size and position (centered)
+        float windowWidth = 900;
+        float windowHeight = 600;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        examWindow.setSize(windowWidth, windowHeight);
+        examWindow.setPosition(windowX, windowY);
+
+        // Adjust padding to prevent title from being cut off
+        examWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.pad(20);
+        table.padTop(50); // Extra top padding to account for title
+
+        // Question label (use smaller font for better readability, black text on white background)
+        BitmapFont questionFont = new BitmapFont();
+        questionFont.getData().setScale(1.8f);
+        Label questionLabel = new Label(question.questionText, new Label.LabelStyle(questionFont, Color.BLACK));
+        questionLabel.setWrap(true);
+        table.add(questionLabel).colspan(2).padBottom(40).width(windowWidth - 80).height(100);
+        table.row();
+
+        // Create 4 answer buttons
+        for (int i = 0; i < 4; i++) {
+            final int answerIndex = i;
+            TextButton answerButton = new TextButton(options[i], skin);
+            answerButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    // Check if answer is correct
+                    if (question.isCorrect(answerIndex)) {
+                        correctAnswers[0]++;
+                    }
+
+                    // Remove current window
+                    examWindow.remove();
+                    stage.getRoot().removeActor(examWindow);
+
+                    // Show next question or finish
+                    currentQuestionIndex[0]++;
+                    showQuestionDialog(questions, currentQuestionIndex, correctAnswers);
+                }
+            });
+            table.add(answerButton).width(350).height(60).pad(10);
+            if (i % 2 == 1) {
+                table.row();
+            }
+        }
+
+        examWindow.add(table);
+        stage.addActor(examWindow);
+    }
+
+    /* Finishes the exam and applies points based on score
+     * Shows result dialog with pass/fail message
+     * @param correctCount - Number of correct answers (out of 5)
+     */
+    private void finishExam(int correctCount) {
+        boolean passed = correctCount >= 3;
+
+        // Apply points
+        if (passed) {
+            points.addPoints(100); // Bonus points for passing
+        } else {
+            points.subtractPoints(50); // Penalty for failing
+        }
+
+        // Show result dialog
+        showExamResultDialog(correctCount, passed);
+    }
+
+    /* Shows the exam result dialog with pass/fail message
+     * @param correctCount - Number of correct answers
+     * @param passed - Whether the player passed (>=3 correct)
+     */
+    private void showExamResultDialog(int correctCount, boolean passed) {
+        // Create window with white background
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.BLACK;
+        // Create white background drawable
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture whiteTexture = new Texture(pixmap);
+        pixmap.dispose();
+        NinePatch whitePatch = new NinePatch(new TextureRegion(whiteTexture), 0, 0, 0, 0);
+        windowStyle.background = new NinePatchDrawable(whitePatch);
+
+        Window resultWindow = new Window("Exam Results", windowStyle);
+        resultWindow.setModal(true);
+        resultWindow.setMovable(false);
+
+        // Set window size and position (centered)
+        float windowWidth = 700;
+        float windowHeight = 400;
+        float windowX = (viewport.getWorldWidth() - windowWidth) / 2;
+        float windowY = (viewport.getWorldHeight() - windowHeight) / 2;
+        resultWindow.setSize(windowWidth, windowHeight);
+        resultWindow.setPosition(windowX, windowY);
+
+        // Adjust padding to prevent title from being cut off
+        resultWindow.padTop(40); // Extra padding at top for title
+
+        // Create table for layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.pad(30);
+        table.padTop(50); // Extra top padding to account for title
+
+        // Result message
+        BitmapFont resultFont = new BitmapFont();
+        resultFont.getData().setScale(2.0f);
+        Color resultColor = passed ? Color.GREEN : Color.RED;
+        String resultMessage = passed ? "PASSED!" : "FAILED!";
+        String scoreMessage = "You got " + correctCount + " out of 5 questions correct.";
+        String pointsMessage = passed ? "+100 points" : "-50 points";
+
+        Label resultLabel = new Label(resultMessage, new Label.LabelStyle(resultFont, resultColor));
+        table.add(resultLabel).padBottom(20);
+        table.row();
+
+        // Score message
+        BitmapFont scoreFont = new BitmapFont();
+        scoreFont.getData().setScale(1.5f);
+        Label scoreLabel = new Label(scoreMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
+        table.add(scoreLabel).padBottom(15);
+        table.row();
+
+        // Points message
+        Label pointsLabel = new Label(pointsMessage, new Label.LabelStyle(scoreFont, Color.BLACK));
+        table.add(pointsLabel).padBottom(30);
+        table.row();
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                resultWindow.remove();
+                stage.getRoot().removeActor(resultWindow);
+                examActive = false;
+                isPaused = false;
+                exam.setExamActive(false);
+            }
+        });
+        table.add(closeButton).width(200).height(50);
+
+        resultWindow.add(table);
+        stage.addActor(resultWindow);
     }
 
     /* Changes the player speed by a modifier given as parameter
@@ -257,6 +974,7 @@ public class GamePlay implements Screen {
         // Key collection
         if (!key.isTriggered() && key.collides(player.getCollision()) && tripWire.isTriggered()) {
             key.trigger();
+            checkAchievementsAndShowPopup();
             hasKey = true;
         }
 
@@ -295,6 +1013,33 @@ public class GamePlay implements Screen {
         if (!speedBoost.isTriggered()) {
             speedBoost.draw(spriteBatch);
         }
+
+        //draw alarm clock if not collected
+        if (!alarmClock.isTriggered()) {
+            alarmClock.draw(spriteBatch);
+        }
+
+        //draw dodgy takeaway if not collected
+        if (!dodgyTakeaway.isTriggered()) {
+            dodgyTakeaway.draw(spriteBatch);
+        }
+
+        if (!dooomScroll.isTriggered()) {
+            dooomScroll.draw(spriteBatch);
+        }
+
+        if (!eduroam.isTriggered()) {
+            eduroam.draw(spriteBatch);
+        }
+
+        //draw recommendation letter (teacher) - always visible
+        recommendationLetter.draw(spriteBatch);
+
+        //draw annoying friend - always visible
+        annoyingFriend.draw(spriteBatch);
+
+        //draw longbois (only uncollected ones)
+        longboiCapture.draw(spriteBatch);
 
         //draw list of doors
         for (Door door : doors) {
@@ -372,6 +1117,35 @@ public class GamePlay implements Screen {
                 speedBoostActive = false;
             }
         }
+        // Updates input inversion timer
+        if (inputInvertedActive) {
+            inputInvertedTimer -= delta;
+            if (inputInvertedTimer <= 0) {
+                player.setInputInverted(false);
+                inputInvertedActive = false;
+            }
+        }
+        // Updates annoying friend timer
+        if (annoyingFriend.isFollowing()) {
+            annoyingFriendTimer -= delta;
+            if (annoyingFriendTimer <= 0) {
+                annoyingFriend.stopFollowing();
+                annoyingFriendLabel.setVisible(false);
+                // Restore player speed (multiply by 2 to undo the 0.5 slow)
+                modifySpeed(2f);
+            }
+        }
+    }
+
+    // Checks for newly unlocked achievements and displays a temporary on-screen message
+    private void checkAchievementsAndShowPopup() {
+        achievements.checkForUnlocks();
+        String msg = achievements.popLastUnlockedMessage(); // Assign message if unlocked
+        if (msg != null) {
+            achievementLabel.setText(msg);
+            achievementLabel.setVisible(true);
+            achievementTimer = 6.0; // show achievement notification for 6 seconds
+        }
     }
 
     // Updates the event counter in game.
@@ -398,6 +1172,14 @@ public class GamePlay implements Screen {
         playerTexture.dispose();
         doorTexture.dispose();
         speedBoost.dispose();
+        alarmClock.dispose();
+        dodgyTakeaway.dispose();
+        recommendationLetter.dispose();
+        annoyingFriend.dispose();
+        longboiCapture.dispose();
+        longboiTexture.dispose();
+        phoneTexture.dispose();
+        wifiTexture.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

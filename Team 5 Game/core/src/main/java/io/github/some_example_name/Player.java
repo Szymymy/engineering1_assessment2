@@ -27,6 +27,7 @@ public class Player {
     private Rectangle playerCollision;
     protected int sizeX;
     protected int sizeY;
+    private boolean inputInverted = false;
 
     Array<TiledMapTileLayer> nonWalkable;
     MapLayer walls_layer;
@@ -59,17 +60,35 @@ public class Player {
         float moveX = 0;
         float moveY = 0;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-        	moveX += playerSpeed * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)  || Gdx.input.isKeyPressed(Input.Keys.A)) {
-        	moveX -= playerSpeed * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)    || Gdx.input.isKeyPressed(Input.Keys.W)) {
-        	moveY += playerSpeed * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)  || Gdx.input.isKeyPressed(Input.Keys.S)) {
-        	moveY -= playerSpeed * delta;
+        // Input inversion: if inverted, swap the key mappings
+        if (inputInverted) {
+            // Inverted: RIGHT/D -> LEFT, LEFT/A -> RIGHT, UP/W -> DOWN, DOWN/S -> UP
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+                moveX -= playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)  || Gdx.input.isKeyPressed(Input.Keys.A)) {
+                moveX += playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.UP)    || Gdx.input.isKeyPressed(Input.Keys.W)) {
+                moveY -= playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)  || Gdx.input.isKeyPressed(Input.Keys.S)) {
+                moveY += playerSpeed * delta;
+            }
+        } else {
+            // Normal input
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+                moveX += playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)  || Gdx.input.isKeyPressed(Input.Keys.A)) {
+                moveX -= playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.UP)    || Gdx.input.isKeyPressed(Input.Keys.W)) {
+                moveY += playerSpeed * delta;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)  || Gdx.input.isKeyPressed(Input.Keys.S)) {
+                moveY -= playerSpeed * delta;
+            }
         }
 
         float newXPosition = position.x + moveX;
@@ -176,5 +195,19 @@ public class Player {
      */
     public void setPlayerSpeed(float newSpeed) {
         this.playerSpeed = newSpeed;
+    }
+
+    /* Setter for input inversion
+     * @param inverted - True to invert input, false for normal input
+     */
+    public void setInputInverted(boolean inverted) {
+        this.inputInverted = inverted;
+    }
+
+    /* Getter for input inversion state
+     * @return boolean - True if input is inverted, false otherwise
+     */
+    public boolean isInputInverted() {
+        return this.inputInverted;
     }
 }

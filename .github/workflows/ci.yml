@@ -30,7 +30,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build + tests + coverage
-        run: ./gradlew :core:test :core:jacocoTestReport --no-daemon
+        run: ./gradlew :core:test :core:jacocoTestReport :headless:test :headless:jacocoTestReport --no-daemon
 
       - name: Upload build and test reports
         if: always()

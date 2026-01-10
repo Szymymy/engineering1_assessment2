@@ -33,9 +33,11 @@ public class RecommendationLetterEvent implements Event {
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.teacherSprite = new Sprite(texture);
-        // Scale to slightly bigger than standard 32x32 textures
-        this.teacherSprite.setSize(48f, 58f);
+        if (texture != null) {
+            this.teacherSprite = new Sprite(texture);
+            // Scale to slightly bigger than standard 32x32 textures
+            this.teacherSprite.setSize(48f, 58f);
+        }
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.eventCounter = eventCounter;
@@ -52,8 +54,10 @@ public class RecommendationLetterEvent implements Event {
 
     public void draw(SpriteBatch batch) {
         // Teacher always remains visible even after giving recommendation letter
-        teacherSprite.setPosition(position.x, position.y);
-        teacherSprite.draw(batch);
+        if (teacherSprite != null) {
+            teacherSprite.setPosition(position.x, position.y);
+            teacherSprite.draw(batch);
+        }
     }
 
     public void dispose() {
@@ -69,11 +73,11 @@ public class RecommendationLetterEvent implements Event {
             eventCounter.incrementPosCounter();
         }
     }
-    
+
     public boolean hasResponded() {
         return hasResponded;
     }
-    
+
     public void setResponded(boolean responded) {
         this.hasResponded = responded;
     }

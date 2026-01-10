@@ -33,12 +33,14 @@ public class AnnoyingFriendEvent implements Event {
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.friendSprite = new Sprite(texture);
-        // Same size as teacher (48x58)
-        this.friendSprite.setSize(48f, 58f);
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.eventCounter = eventCounter;
+        if (texture != null) {
+            this.friendSprite = new Sprite(texture);
+            // Same size as teacher (48x58)
+            this.friendSprite.setSize(48f, 58f);
+        }
     }
 
     // Checks for player collision (only before triggered)
@@ -59,7 +61,7 @@ public class AnnoyingFriendEvent implements Event {
             float dx = playerPosition.x - position.x;
             float dy = playerPosition.y - position.y;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
-            
+
             // Only move if not too close to player
             if (distance > 30f) {
                 // Normalize and apply speed
@@ -73,8 +75,10 @@ public class AnnoyingFriendEvent implements Event {
 
     public void draw(SpriteBatch batch) {
         // Friend is always visible (before and during following)
-        friendSprite.setPosition(position.x, position.y);
-        friendSprite.draw(batch);
+        if (friendSprite != null) {
+            friendSprite.setPosition(position.x, position.y);
+            friendSprite.draw(batch);
+        }
     }
 
     public void dispose() {

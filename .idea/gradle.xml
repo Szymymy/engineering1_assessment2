@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$/Team 5 Game" />
             <option value="$PROJECT_DIR$/Team 5 Game/core" />
+            <option value="$PROJECT_DIR$/Team 5 Game/headless" />
             <option value="$PROJECT_DIR$/Team 5 Game/lwjgl3" />
           </set>
         </option>

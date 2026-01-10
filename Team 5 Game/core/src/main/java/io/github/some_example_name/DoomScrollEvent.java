@@ -24,11 +24,13 @@ public class DoomScrollEvent implements Event{
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.phoneSprite = new Sprite(texture);
-        this.phoneSprite.setSize(60f,70f);
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.eventCounter = eventCounter;
+        if (texture != null) {
+            this.phoneSprite = new Sprite(texture);
+            this.phoneSprite.setSize(60f, 70f);
+        }
     }
 
     public boolean checkCollision(Player player) {
@@ -40,8 +42,10 @@ public class DoomScrollEvent implements Event{
     }
 
     public void draw(SpriteBatch batch) {
-        phoneSprite.setPosition(position.x, position.y);
-        phoneSprite.draw(batch);
+        if (phoneSprite != null) {
+            phoneSprite.setPosition(position.x, position.y);
+            phoneSprite.draw(batch);
+        }
     }
 
     public void dispose() {

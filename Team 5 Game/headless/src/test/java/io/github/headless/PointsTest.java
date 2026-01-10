@@ -90,6 +90,12 @@ public class PointsTest {
         assertEquals(0, points.getScore());
     }
 
+    @Test
+    @DisplayName("Testing tests")
+    void testTest() {
+        assertTrue(false);
+    }
+
 
 
 }

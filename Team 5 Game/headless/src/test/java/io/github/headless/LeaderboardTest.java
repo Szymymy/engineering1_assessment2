@@ -7,7 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LeaderboardTest {
     @Test
-    public void getTest() {
+    public void trueTest() {
         assertEquals(true, true);
+    }
+
+    @Test
+    public void falseTest() {
+        assertTrue(false);
     }
 }

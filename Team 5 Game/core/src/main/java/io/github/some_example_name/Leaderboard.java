@@ -26,18 +26,23 @@ public class Leaderboard {
      */
     public Leaderboard() {
         leaderboard = new String[] {"null&0","null&0","null&0","null&0","null&0"};
-        loadLeaderboard();
+        loadLeaderboard("data.txt");
     }
+
+    public Leaderboard(String filepath) {
+        leaderboard = new String[] {"null&0","null&0","null&0","null&0","null&0"};
+        loadLeaderboard(filepath);
+    }   
 
     /**
      * loadLeaderboard() opens a text file and reads the data in it to then 
      * parse it into a String[].
-     * @return returns a String[] containing data held in the data.txt file, 
+     * @return returns a String[] containing data held in the text file, 
      * storing the leaderboard.
      */
-    public String[] loadLeaderboard() {
+    public String[] loadLeaderboard(String pathname) {
         try {
-            File saveFile = new File("data.txt");
+            File saveFile = new File(pathname);
 
             if (saveFile.createNewFile()) {
                 System.out.println("File created: " + saveFile.getName());
@@ -71,12 +76,12 @@ public class Leaderboard {
      * @param newName the potential new nickname to be added to the leaderboard.
      * @return true if succesful, false if otherwise.
      */
-    public boolean updateLeaderboard(int newScore, String newName) {
+    public boolean updateLeaderboard(int newScore, String newName, String filepath) {
         HashMap<String, Integer> scoreMap = new HashMap<>();
         if (scoreMap.containsKey(newName)) {
             return false;
         }
-        String[] newLeaderboard = loadLeaderboard();
+        String[] newLeaderboard = loadLeaderboard(filepath);
         int delimInt = 0;
         for (String scores: newLeaderboard) {
             delimInt = scores.indexOf('&');
@@ -96,7 +101,7 @@ public class Leaderboard {
             i++;
         }
         try {
-            FileWriter scoreWriter = new FileWriter("data.txt");
+            FileWriter scoreWriter = new FileWriter(filepath);
             for (String scores: newLeaderboard) {
                 scoreWriter.write(scores+"\n");
             }
@@ -121,14 +126,14 @@ public class Leaderboard {
     /**
      * Leaderboard clearer.
      */
-    public void clearLeaderboard() {
+    public void clearLeaderboard(String filepath) {
         int i = 0;
         while (i < leaderboard.length) {
             leaderboard[i] = "null&0";
             i++;
         }
         try {
-            FileWriter scoreWriter = new FileWriter("data.txt");
+            FileWriter scoreWriter = new FileWriter(filepath);
             for (String scores: leaderboard) {
                 scoreWriter.write(scores+"\n");
             }

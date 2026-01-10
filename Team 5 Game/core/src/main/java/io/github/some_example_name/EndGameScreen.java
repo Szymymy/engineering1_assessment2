@@ -138,7 +138,7 @@ public class EndGameScreen implements Screen{
                 String name = nameInputField.getText();
                 if (!(name.length() > 64 || name.length() == 0 || name.contains("&"))) {
                     leaderboard = new Leaderboard();
-                    leaderboard.updateLeaderboard(score, name);
+                    leaderboard.updateLeaderboard(score, name, "data.txt");
                     nameLeaderboardButton.setDisabled(true);
                     nameInputField.clear();
                 } else {

@@ -1,0 +1,5 @@
+Bart&10000
+Lisa&9000
+Maggie&6000
+Marge&5000
+Homer&1000

@@ -100,7 +100,7 @@ public class LeaderboardScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Leaderboard leaderboard = new Leaderboard();
-                leaderboard.clearLeaderboard();
+                leaderboard.clearLeaderboard("data.txt");
                 table.clear();
                 drawLeaderboard(table);
             }

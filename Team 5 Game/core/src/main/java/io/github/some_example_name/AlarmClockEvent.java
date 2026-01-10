@@ -32,11 +32,13 @@ public class AlarmClockEvent implements Event {
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.alarmClockSprite = new Sprite(texture);
-        this.alarmClockSprite.setSize(80f, 50f);
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.eventCounter = eventCounter;
+        if (texture != null) {
+            this.alarmClockSprite = new Sprite(texture);
+            this.alarmClockSprite.setSize(80f, 50f);
+        }
     }
 
     // Checks for player collision
@@ -50,8 +52,10 @@ public class AlarmClockEvent implements Event {
 
     public void draw(SpriteBatch batch) {
         if (!isTriggered) {
-            alarmClockSprite.setPosition(position.x, position.y);
-            alarmClockSprite.draw(batch);
+            if (alarmClockSprite != null) {
+                alarmClockSprite.setPosition(position.x, position.y);
+                alarmClockSprite.draw(batch);
+            }
         }
     }
 

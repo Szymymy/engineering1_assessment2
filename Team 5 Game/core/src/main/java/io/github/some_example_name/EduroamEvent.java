@@ -19,11 +19,13 @@ public class EduroamEvent implements Event{
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.wifiSprite = new Sprite(texture);
-        this.wifiSprite.setSize(70f, 70f);
         this.position = new Vector2(xPosition, yPosition);
         this.eventCounter = eventCounter;
         this.collisionRadius = 20f;
+        if (texture != null) {
+            this.wifiSprite = new Sprite(texture);
+            this.wifiSprite.setSize(70f, 70f);
+        }
     }
 
     public boolean checkCollision(Player player) {
@@ -35,8 +37,10 @@ public class EduroamEvent implements Event{
     }
 
     public void draw(SpriteBatch batch) {
-        wifiSprite.setPosition(position.x, position.y);
-        wifiSprite.draw(batch);
+        if (wifiSprite != null) {
+            wifiSprite.setPosition(position.x, position.y);
+            wifiSprite.draw(batch);
+        }
     }
 
     public void dispose() {

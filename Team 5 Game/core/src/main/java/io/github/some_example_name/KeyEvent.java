@@ -43,7 +43,9 @@ public class KeyEvent implements Event {
     // Only draws item if it has not been collected
     public void draw(SpriteBatch sprite) {
         if (!isTriggered()) {
-            sprite.draw(texture, keyCollision.x, keyCollision.y, keyCollision.width, keyCollision.height);
+            if (texture != null) {
+                sprite.draw(texture, keyCollision.x, keyCollision.y, keyCollision.width, keyCollision.height);
+            }
         }
     }
 

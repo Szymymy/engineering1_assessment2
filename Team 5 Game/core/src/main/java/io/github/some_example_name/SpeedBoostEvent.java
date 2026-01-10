@@ -33,7 +33,9 @@ public class SpeedBoostEvent implements Event{
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.boostSprite = new Sprite(texture);
+        if (texture != null) {
+            this.boostSprite = new Sprite(texture);
+        }
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 20f;
         this.active = true;
@@ -51,8 +53,10 @@ public class SpeedBoostEvent implements Event{
 
     public void draw(SpriteBatch batch) {
         if (!isTriggered) {
-            boostSprite.setPosition(position.x, position.y);
-            boostSprite.draw(batch);
+            if (boostSprite != null) {
+                boostSprite.setPosition(position.x, position.y);
+                boostSprite.draw(batch);
+            }
         }
     }
 

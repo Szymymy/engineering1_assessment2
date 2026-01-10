@@ -32,12 +32,14 @@ public class DodgyTakeawayEvent implements Event {
         this.name = name;
         this.isTriggered = false;
         this.texture = texture;
-        this.dodgyTakeawaySprite = new Sprite(texture);
-        // Scale sprite to slightly bigger than standard 32x32 textures
-        this.dodgyTakeawaySprite.setSize(48f, 48f);
         this.position = new Vector2(xPosition, yPosition);
         this.collisionRadius = 24f; // Adjusted to match larger sprite size
         this.eventCounter = eventCounter;
+        if (texture != null) {
+            this.dodgyTakeawaySprite = new Sprite(texture);
+            // Scale sprite to slightly bigger than standard 32x32 textures
+            this.dodgyTakeawaySprite.setSize(48f, 48f);
+        }
     }
 
     // Checks for player collision

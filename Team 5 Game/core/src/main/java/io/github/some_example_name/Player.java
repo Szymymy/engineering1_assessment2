@@ -40,13 +40,16 @@ public class Player {
       @param startYposition - Starting player position on y-axis
       @param nonWalkableLayers - An array of map layers the player can't move on.
     */
-    public Player(Texture playerTexture, float startXPosition, float startYPosition, 
+    public Player(Texture playerTexture, float startXPosition, float startYPosition,
                 MapLayer wallLayer, int sizeX, int sizeY) {
-        sprite = new Sprite(playerTexture);
-        position = new Vector2(startXPosition, startYPosition);
-        sprite.setPosition(position.x, position.y);
-        sprite.setSize(sizeX, sizeY);
 
+        position = new Vector2(startXPosition, startYPosition);
+
+        if (playerTexture != null) {
+            sprite = new Sprite(playerTexture);
+            sprite.setPosition(position.x, position.y);
+            sprite.setSize(sizeX, sizeY);
+        }
         this.walls_layer = wallLayer;
 
         playerCollision = new Rectangle(position.x, position.y, (float) (sizeX), (float) (sizeY));

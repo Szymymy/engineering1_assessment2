@@ -1,6 +1,8 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 /* Main class of the application.
@@ -14,10 +16,12 @@ public class Main extends Game {
 
     @Override
     public void create() {
-
-    	batch = new SpriteBatch();
-        //Calling the new class here
-        setScreen(new MainMenu(this)); // Start with the menu
+        if (Gdx.app.getType() != Application.ApplicationType.HeadlessDesktop) {
+            batch = new SpriteBatch();
+            //Calling the new class here
+            setScreen(new MainMenu(this)); // Start with the menu
+        }
+    	
 
     }
 
@@ -29,7 +33,9 @@ public class Main extends Game {
   //This function disposes of application resources freeing up memory
     @Override
     public void dispose() {
-        batch.dispose();
+        if (batch != null) {
+            batch.dispose();
+        }
         if (getScreen() != null) {
         	getScreen().dispose();
         }

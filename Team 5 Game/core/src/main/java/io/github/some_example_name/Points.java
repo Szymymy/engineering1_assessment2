@@ -81,4 +81,18 @@ public class Points {
         return finalScore;
     }
 
+    /* Getter for base score
+     * @return baseScore - the player's base score during gameplay 
+     */
+    public int getBaseScore() {
+        return baseScore;
+    }
+
+    /* Getter for penalty score
+     * @return penalties - the player's penalties accumulated during gameplay 
+     */
+    public int getPenalties() {
+        return penalties;
+    }
+
 }

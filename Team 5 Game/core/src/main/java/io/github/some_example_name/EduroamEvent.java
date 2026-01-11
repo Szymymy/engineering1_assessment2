@@ -5,12 +5,18 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
+/**
+ * This class is a negative event
+ * it will be triggered when player encounters the internet sprite
+ * as a result it take time away from the player
+ * can only be triggered once in the game
+ */
 public class EduroamEvent implements Event{
 
     private String name;
     private boolean isTriggered;
     private Texture texture;
-    private Sprite wifiSprite;
+    private Sprite internetSprite;
     private Vector2 position;
     private float collisionRadius;
     private EventCounter eventCounter;
@@ -23,8 +29,8 @@ public class EduroamEvent implements Event{
         this.eventCounter = eventCounter;
         this.collisionRadius = 20f;
         if (texture != null) {
-            this.wifiSprite = new Sprite(texture);
-            this.wifiSprite.setSize(70f, 70f);
+            this.internetSprite = new Sprite(texture);
+            this.internetSprite.setSize(40f, 40f);
         }
     }
 
@@ -37,9 +43,9 @@ public class EduroamEvent implements Event{
     }
 
     public void draw(SpriteBatch batch) {
-        if (wifiSprite != null) {
-            wifiSprite.setPosition(position.x, position.y);
-            wifiSprite.draw(batch);
+        if (internetSprite != null) {
+            internetSprite.setPosition(position.x, position.y);
+            internetSprite.draw(batch);
         }
     }
 

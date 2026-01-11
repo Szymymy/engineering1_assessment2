@@ -27,14 +27,14 @@ In addition we have also provided the game files for you to play.
 ## Executable code 
 - [Download Team_5_Game.jar](https://github.com/thomas-nolan/Engineering-1.github.io/raw/main/team-5/Team_5_Game.jar)
 
-## Source files for the game
-- [Github repository](https://github.com/thomas-nolan/Engineering-1.github.io)
+## Source files for the game by team 5
+- [Github repository (Assessment 1)](https://github.com/thomas-nolan/Engineering-1.github.io)
 
-## Updated Executable code
+## Executable code by team 6
 -[Download updated team 5 game by team 6.jar](added when done)
 
 ## Updated game files by team 6
-- [Github repository](https://github.com/Szymymy/engineering1_assessment2)
+- [Github repository (Assessment 2)](https://github.com/Szymymy/engineering1_assessment2)
 
 --------------------------------------------------------
 ## Project Plan Evolution 
@@ -102,6 +102,14 @@ Below are the key versions of our project plan, showing how our Gantt chart deve
 - Added **review and documentation** tasks near the end.  
 - Represents a **realistic and adaptive final plan**, balancing scope and deadlines.
 
+
+---
+### **Team 6 project plan**
+<img width="1115" height="533" alt="Updated_Gantt_Chart" src="https://github.com/user-attachments/assets/54f8ca08-900b-4926-ab02-66e3a1c29fcb" />
+
+
+
+
 ---------------------------------------------
 
 ## Architecture Evolution  
@@ -137,6 +145,13 @@ The first architectural diagrams were created to illustrate the early CRC design
 </div>
 
 ---
+
+## Updated Architecture Structure by team 6 
+
+UML diagrams of the leaderboard and the achievements 
+
+<img width="535" height="452" alt="achievements" src="https://github.com/user-attachments/assets/8c2f65f8-5c80-41cf-bfaf-e48e0a14591e" />
+<img width="466" height="274" alt="leaderboard" src="https://github.com/user-attachments/assets/c897b897-2771-40cd-8d26-500956c8a41a" />
 
 ### First Implementation — Basic Packages and Layers  
 
@@ -175,6 +190,8 @@ The final implementation of the structure by:
   <img width="3405" height="508" alt="final uml 2" src="https://github.com/user-attachments/assets/ce639b89-e707-4f43-ae89-11d0e0e7a9b5" />
 
 </div>
+
+
   
 
 ### Software Testing placeholder done by team 6

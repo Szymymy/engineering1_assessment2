@@ -49,7 +49,7 @@ public class Dean extends Player{
             float newX = position.x + direction.x * deanSpeed * delta;
             float newY = position.y + direction.y * deanSpeed * delta;
 
-            
+
 
             //checks if there is a collision
             if(isWalkable(deanRect)){
@@ -79,6 +79,7 @@ public class Dean extends Player{
     public boolean checkCollision(Rectangle playerRect){
         return deanRect.overlaps(playerRect);
     }
+
 
 }
 

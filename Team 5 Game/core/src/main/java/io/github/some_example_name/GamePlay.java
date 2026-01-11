@@ -52,7 +52,7 @@ public class GamePlay implements Screen {
     Texture friendTexture;
     Texture longboiTexture;
     Texture phoneTexture;
-    Texture wifiTexture;
+    Texture internetTexture;
 
     SpriteBatch spriteBatch;
     BitmapFont font;
@@ -160,10 +160,10 @@ public class GamePlay implements Screen {
         teacherTexture = new Texture(Gdx.files.internal("teacher.png"));
         friendTexture = new Texture(Gdx.files.internal("friend.png"));
         longboiTexture = new Texture(Gdx.files.internal("longboi.png"));
-        // placeholder texture can be changed later
+
         phoneTexture = new Texture(Gdx.files.internal("phone.png"));
-        // place holder texture
-        wifiTexture = new Texture(Gdx.files.internal("wifi1.png"));
+
+        internetTexture = new Texture(Gdx.files.internal("Internet_red.png"));
         System.out.println("Textures loaded successfully");
 
         // Load map
@@ -201,7 +201,7 @@ public class GamePlay implements Screen {
         // (placeholder coordinates can be changed later)
         dooomScroll = new DoomScrollEvent("DoomScroll", phoneTexture,250,250, eventCounter);
 
-        eduroam = new EduroamEvent("eduroam", wifiTexture, 500, 300, eventCounter);
+        eduroam = new EduroamEvent("eduroam", internetTexture, 950, 350, eventCounter);
 
         // dean
         dean = new Dean(deanTexture, 550f, 480f, nonWalkableLayers, walls, 425f, 425f, 180f, 145f, 50, 50);
@@ -490,7 +490,6 @@ public class GamePlay implements Screen {
                 public void clicked(InputEvent event, float x, float y) {
                     window.remove();
                     stage.getRoot().removeActor(window);
-                    points.subtractPoints(9000);
                     isPaused = false;
                     updateTimer(150);
                 }
@@ -500,6 +499,7 @@ public class GamePlay implements Screen {
             stage.addActor(window);
         }
     }
+
     public void doomScroll() {
         if (!dooomScroll.isTriggered() && dooomScroll.checkCollision(player)) {
             dooomScroll.trigger();
@@ -536,7 +536,7 @@ public class GamePlay implements Screen {
 
             BitmapFont messageFont = new BitmapFont();
             messageFont.getData().setScale(1.8f);
-            Label messageLabel = new Label("You decided to doomscroll instead of revising, as a result you lose 3000 points", new Label.LabelStyle(messageFont, Color.BLACK));
+            Label messageLabel = new Label("You decided to doomscroll instead of revising, as a result you lose 25 points", new Label.LabelStyle(messageFont, Color.BLACK));
             messageLabel.setWrap(true);
             table.add(messageLabel).width(windowWidth - 120);
             table.row();
@@ -547,7 +547,7 @@ public class GamePlay implements Screen {
                 public void clicked(InputEvent event, float x, float y) {
                     doomWindow.remove();
                     stage.getRoot().removeActor(doomWindow);
-                    points.subtractPoints(9000);
+                    points.subtractPoints(100);
                     isPaused = false;
                 }
             });
@@ -1179,7 +1179,7 @@ public class GamePlay implements Screen {
         longboiCapture.dispose();
         longboiTexture.dispose();
         phoneTexture.dispose();
-        wifiTexture.dispose();
+        internetTexture.dispose();
         keyTexture.dispose();
         deanTexture.dispose();
         map.dispose();

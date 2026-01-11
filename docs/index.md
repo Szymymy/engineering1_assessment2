@@ -187,25 +187,23 @@ The second implementation improved the structure by:
 
 
 <div align="center">
-
-
-
   <img src="https://github.com/user-attachments/assets/1924fdae-6ada-4640-aa17-a8f148f57866" width="70%" alt="Refined Architecture Diagram" />
 </div>
 
 ---
 
-### Final updated Architecture – Added the rest of the events and additional classes
+### Refined Architecture — Added Layers and Use of Interfaces  
 
-The final implementation of the structure by:
-- adding the rest of the events that were added
-- adding the leaderboard and achievements
+The second implementation improved the structure by:
+- Adding **additional layers**
+- Refactoring **Event** into an **interface** for more flexible event handling  
+
 
 <div align="center">
-
-  <img width="3405" height="508" alt="final uml 2" src="https://github.com/user-attachments/assets/ce639b89-e707-4f43-ae89-11d0e0e7a9b5" />
-
+  <img src="https://github.com/user-attachments/assets/1924fdae-6ada-4640-aa17-a8f148f57866" width="70%" alt="Refined Architecture Diagram" />
 </div>
+
+---
 
 
   

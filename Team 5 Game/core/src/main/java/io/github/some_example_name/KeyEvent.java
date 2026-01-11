@@ -29,9 +29,13 @@ public class KeyEvent implements Event {
     public KeyEvent(String name, Rectangle keyZone, Texture texture, EventCounter eventCounter) {
         this.name = name;
         this.keyCollision = keyZone;
-        this.texture = texture;
+        if (texture != null){
+            this.texture = texture;
+        }
         this.isTriggered = false;
-        this.eventCounter = eventCounter;
+        if (eventCounter != null){
+            this.eventCounter = eventCounter;
+        }
     }
 
 

@@ -12,7 +12,9 @@ public class Door {
     public Door(float x, float y, float width, float height, Texture texture) {
         this.doorCollision = new Rectangle(x, y, width, height);
         this.isLocked = true;
-        this.texture = texture;
+        if (texture != null){
+            this.texture = texture;
+        }
     }
 
     public boolean isLocked() {

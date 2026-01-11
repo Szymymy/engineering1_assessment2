@@ -11,11 +11,11 @@ In addition we have also provided the game files for you to play.
 
 ## Project documents
 
-- [Requirements document](Requirements.pdf)
-- [Architecture document](Architecture.pdf)
-- [Method selection and planning document](Method_selection_and_planning_.pdf)
-- [Risk assessment and mitigation document](Risk_Assesment_and_Mitigation.pdf)
-- [Implementation document](Licensing.pdf)
+- [Requirements document](https://docs.google.com/document/d/11cKGVI9bIidsGL_vM8B8Elfa5Uu1Gld3ycvVBK6wCzo/edit?tab=t.0)
+- [Architecture document](https://docs.google.com/document/d/18anxyBsBA2JLQAbOXv-FgHyiZ0AbSafrWc7lPbHJ-kA/edit?tab=t.0)
+- [Method selection and planning document](https://docs.google.com/document/d/1uRArOpfuHbGlB6fPBPOewpcEpiy4NL6eTMKybOXcls0/edit?tab=t.0)
+- [Risk assessment and mitigation document](https://docs.google.com/document/d/1BaN6tM-y_PZAdk93ris6yNp2UIRmYdLbaQxsOXF_1lY/edit?tab=t.0)
+- [Implementation document](https://docs.google.com/document/d/1e_rFW1CAt0xqrHohUx3Pf5OAUZ2UAqwzFZcsEqGmDH4/edit?tab=t.0)
 
 
 ## updated project documents by team 6

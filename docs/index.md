@@ -31,7 +31,7 @@ In addition we have also provided the game files for you to play.
 - [Github repository (Assessment 1)](https://github.com/thomas-nolan/Engineering-1.github.io)
 
 ## Executable code by team 6
-- [Download updated team 5 game by team 6.jar]((https://drive.google.com/file/d/19U8kNv0Yuayy5iAAUxK1VEairrcUtvja/view?usp=drive_link))
+- [Download updated team 5 game by team 6.jar](https://drive.google.com/file/d/19U8kNv0Yuayy5iAAUxK1VEairrcUtvja/view?usp=drive_link)
 
 ## Updated game files by team 6
 - [Github repository (Assessment 2)](https://github.com/Szymymy/engineering1_assessment2)

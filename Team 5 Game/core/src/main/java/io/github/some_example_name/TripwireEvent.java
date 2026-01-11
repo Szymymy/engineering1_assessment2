@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Rectangle;
  * Responsible for the trip wire.
  *
  * The trip wire locks the door in the dean's office
- * which requires a key to unlock again.
+ * which requires a key to unlock
  */
 public class TripwireEvent implements Event{
     private String name;

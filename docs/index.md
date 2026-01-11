@@ -37,6 +37,10 @@ In addition we have also provided the game files for you to play.
 ## Updated game files by team 6 (Assessment 2)
 - [Github repository (Assessment 2)](https://github.com/Szymymy/engineering1_assessment2)
 
+### Software Testing results done by team 6 (Assessment 2)
+
+- [automated Software Testing results](test/index.md)
+
 --------------------------------------------------------
 ## Project Plan Evolution 
 
@@ -206,6 +210,4 @@ The final implementation of the structure by:
 
   
 
-### Software Testing placeholder done by team 6
 
-[automated Software Testing results](test/index.md)

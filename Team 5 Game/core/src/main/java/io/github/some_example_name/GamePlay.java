@@ -163,7 +163,7 @@ public class GamePlay implements Screen {
 
         phoneTexture = new Texture(Gdx.files.internal("phone.png"));
 
-        internetTexture = new Texture(Gdx.files.internal("Internet_red.png"));
+        internetTexture = new Texture(Gdx.files.internal("Internet_Red.png"));
         System.out.println("Textures loaded successfully");
 
         // Load map

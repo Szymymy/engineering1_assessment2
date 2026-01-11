@@ -9,7 +9,7 @@ In addition we have also provided the game files for you to play.
 - [Go to Project Plan Evolution](#project-plan-evolution)
 - [Go to Architecture Evolution](#architecture-evolution)
 
-## Project documents
+## Project documents (Assessment 1)
 
 - [Requirements document](https://docs.google.com/document/d/11cKGVI9bIidsGL_vM8B8Elfa5Uu1Gld3ycvVBK6wCzo/edit?tab=t.0)
 - [Architecture document](https://docs.google.com/document/d/18anxyBsBA2JLQAbOXv-FgHyiZ0AbSafrWc7lPbHJ-kA/edit?tab=t.0)
@@ -18,22 +18,23 @@ In addition we have also provided the game files for you to play.
 - [Implementation document](https://docs.google.com/document/d/1e_rFW1CAt0xqrHohUx3Pf5OAUZ2UAqwzFZcsEqGmDH4/edit?tab=t.0)
 
 
-## updated project documents by team 6
+## updated project documents by team 6 (Assessment 2)
 - [Change report Document](https://docs.google.com/document/d/1c22gnWIYHvwpSHianpsmM7BoW3IHVpx7ZGGihe3KV54/edit?tab=t.0)
 - [Implementation Document](https://docs.google.com/document/d/18nzHqC--moafnhy3LhxpXwR0W6zuLDYM-xaXcvr6niA/edit?tab=t.0)
 - [Testing Document](https://docs.google.com/document/d/1QDP2GJ24GCFGsrmE5xK8RqbZl_yNdQ9cTyU55ui0BOY/edit?tab=t.0)
 - [User Evaluation Document](https://docs.google.com/document/d/1l754glt3XRBx2aXs58wN64kFvF39EBvV5Yxe7zrioaU/edit?tab=t.0)
 - [Continuous Integration Document](https://docs.google.com/document/d/1p8BscnD0Qf2L_4-PW4tOVYv2rZh6ju1icTICx9jL9HY/edit?tab=t.0)
-## Executable code 
-- [Download Team_5_Game.jar](https://github.com/thomas-nolan/Engineering-1.github.io/raw/main/team-5/Team_5_Game.jar)
+  
+## Executable code by team 5 (Assessment 1)
+- [Download Team_5_Game.jar (Assessment 1)](https://github.com/thomas-nolan/Engineering-1.github.io/raw/main/team-5/Team_5_Game.jar)
 
-## Source files for the game by team 5
+## Source files for the game by team 5 (Assessment 1)
 - [Github repository (Assessment 1)](https://github.com/thomas-nolan/Engineering-1.github.io)
 
-## Executable code by team 6
-- [Download updated team 5 game by team 6.jar](https://drive.google.com/file/d/19U8kNv0Yuayy5iAAUxK1VEairrcUtvja/view?usp=drive_link)
+## Executable code by team 6 (Assessment 2)
+- [Download updated team 5 game by team 6.jar (Assessment 2)](https://drive.google.com/file/d/19U8kNv0Yuayy5iAAUxK1VEairrcUtvja/view?usp=drive_link)
 
-## Updated game files by team 6
+## Updated game files by team 6 (Assessment 2)
 - [Github repository (Assessment 2)](https://github.com/Szymymy/engineering1_assessment2)
 
 --------------------------------------------------------
@@ -105,7 +106,18 @@ Below are the key versions of our project plan, showing how our Gantt chart deve
 
 ---
 ### **Team 6 project plan**
+
+### structure diagram
+<img width="1576" height="1046" alt="structure diagram" src="https://github.com/user-attachments/assets/5ed2d0b3-ee35-4294-afb6-c51054837d4d" />
+
+
+### initial plan
+<img width="971" height="533" alt="inital diagram" src="https://github.com/user-attachments/assets/0bd75cdb-6619-4fb6-9f68-e50deaf46a04" />
+
+### final plan
 <img width="1115" height="533" alt="Updated_Gantt_Chart" src="https://github.com/user-attachments/assets/54f8ca08-900b-4926-ab02-66e3a1c29fcb" />
+
+
 
 
 
@@ -134,7 +146,7 @@ Early CRC (Class–Responsibility–Collaborator) cards were made to get a first
 
 ### Initial Architecture Structure  
 
-The first architectural diagrams were created to illustrate the early CRC designs, in which the disgins were translated into a working code structure.  
+The first architectural diagrams were created to illustrate the early CRC designs, in which the designs were translated into a working code structure.  
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/0d23854f-b921-4b20-83f2-f0442c838d7f" width="45%" alt="Architecture 1" />
@@ -196,4 +208,4 @@ The final implementation of the structure by:
 
 ### Software Testing placeholder done by team 6
 
-[Software Testing ](test/index.md)
+[automated Software Testing results](test/index.md)
